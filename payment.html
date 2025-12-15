@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Payment — PBR VITS</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <header class="glass card popIn">
+      <h1>💳 Payment Instructions</h1>
+      <h2>Bank Transfer Details</h2>
+    </header>
+
+    <section class="glass card popIn">
+      <div class="grid grid-2">
+        <div><span class="label">Bank Transfer Account Number</span><div class="receipt"><strong>1234567890</strong></div></div>
+        <div><span class="label">Account Holder Name</span><div class="receipt"><strong>tulluru chetan</strong></div></div>
+      </div>
+      <p class="footer-note">Transfer the total amount. Then enter your UTR below to confirm.</p>
+      <div class="grid grid-2">
+        <div>
+          <label class="label" for="utr">Enter UTR Number</label>
+          <input id="utr" placeholder="e.g., AXIS9A1B2C" />
+        </div>
+        <div>
+          <label class="label" for="note">Note (optional)</label>
+          <input id="note" placeholder="Any message for admin" />
+        </div>
+      </div>
+      <div style="margin-top:14px; display:flex; gap:10px;">
+        <button id="confirmPay" class="btn glow">Confirm & Download Receipt</button>
+        <a class="btn ghost" href="index.html">← Back</a>
+      </div>
+    </section>
+  </div>
+
+  <script>
+  function $(s, r=document){ return r.querySelector(s); }
+  function getRegs(){ return JSON.parse(localStorage.getItem("registrations")||"[]"); }
+  function setRegs(a){ localStorage.setItem("registrations", JSON.stringify(a)); }
+  function isDupUTR(utr){ return getRegs().some(r=> r.utr.toLowerCase()===utr.toLowerCase()); }
+
+  const pending = JSON.parse(localStorage.getItem("pendingPayment")||"null");
+  if(!pending){
+    alert("No pending cart found. Please start from registration page.");
+    window.location.href = "index.html";
+  }
+
+  $("#confirmPay").addEventListener("click", ()=>{
+    const utr = $("#utr").value.trim();
+    if(!/^[A-Za-z0-9]{8,}$/.test(utr)){ alert("Enter a valid UTR (min 8 alphanumeric)"); return; }
+    if(isDupUTR(utr)){ alert("This UTR already exists. If you believe it's an error, contact support 7075881419."); return; }
+
+    const reg = {
+      id: "REG-"+Date.now(),
+      name: pending.name, roll: pending.roll, gender: pending.gender, year: pending.year,
+      branch: pending.branch, events: pending.items.map(i=>i.id), items: pending.items, total: pending.total,
+      utr, note: $("#note").value.trim(), ts: new Date().toISOString()
+    };
+    const all = getRegs(); all.push(reg); setRegs(all);
+    localStorage.setItem("lastRegistrationId", reg.id);
+    // clear pending
+    localStorage.removeItem("pendingPayment");
+    window.location.href = "receipt.html";
+  });
+  </script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin — PBR VITS</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <header class="glass card popIn">
+      <h1>🔐 Admin Dashboard</h1>
+      <h2>Search, filter, export, print registrations</h2>
+    </header>
+
+    <section class="glass card popIn" id="login">
+      <div class="grid grid-2">
+        <div>
+          <label class="label" for="pass">Enter Admin Password</label>
+          <input type="password" id="pass" placeholder="••••••••" />
+        </div>
+      </div>
+      <div style="margin-top:12px; display:flex; gap:10px;">
+        <button id="loginBtn" class="btn">Login</button>
+        <a href="index.html" class="btn ghost">← Back</a>
+      </div>
+      <p class="footer-note">Default password: <strong>admin@123</strong> (change in <code>admin.js</code>).</p>
+    </section>
+
+    <section class="glass card popIn" id="panel" style="display:none;">
+      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:8px;">
+        <input id="q" placeholder="Search name/roll/UTR/event..." />
+        <select id="bf"><option value="">All branches</option></select>
+        <button id="print" class="btn">Print</button>
+        <button id="export" class="btn">Export CSV</button>
+        <button id="clear" class="btn" style="background:linear-gradient(135deg, var(--bad), #cc4b4b); color:white;">Clear All</button>
+      </div>
+      <table class="table" id="tab">
+        <thead><tr><th>#</th><th>Reg ID</th><th>Name</th><th>Roll</th><th>Gender</th><th>Year</th><th>Branch</th><th>Events</th><th>Total</th><th>UTR</th><th>Date</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="footer-note" id="count"></div>
+    </section>
+  </div>
+  <script src="admin.js"></script>
+</body>
+</html>
