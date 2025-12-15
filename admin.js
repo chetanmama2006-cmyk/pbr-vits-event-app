@@ -1,4 +1,5 @@
 
+const ADMIN_PASSWORD = "yashu@123";
 
 function $(s, r=document){ return r.querySelector(s); }
 function $all(s, r=document){ return Array.from(r.querySelectorAll(s)); }
