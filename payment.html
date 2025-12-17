@@ -18,8 +18,6 @@
       vertical-align: middle;
     }
     .copy-badge:active { transform: scale(0.9); }
-    
-    /* Timer Style */
     .timer-box {
         background: rgba(255, 107, 107, 0.15);
         border: 1px solid var(--bad);
@@ -36,15 +34,12 @@
   <div class="container">
     <header class="glass card popIn">
       <h1>💳 Payment Instructions</h1>
-      
       <div class="timer-box">
         ⏳ Session Expires In: <span id="timer">05:00</span>
       </div>
-
       <div class="glass" style="margin-top: 15px; padding: 15px; border: 1px solid var(--accent); border-radius: 16px; text-align: center;">
         <span class="label" style="display: block; margin-bottom: 5px; font-size: 0.9rem;">Total Amount to Pay</span>
         <h1 id="displayTotal" style="margin: 0; color: var(--good); font-size: 2.8rem; letter-spacing: -1px;">₹0</h1>
-        <button class="copy-badge" onclick="copyText(pending.total, 'Amount')">Copy Amount</button>
       </div>
     </header>
 
@@ -60,19 +55,15 @@
         </div>
       </div>
 
-      <h2>Bank Details</h2>
       <div class="grid grid-2">
         <div>
           <span class="label">UPI ID</span>
           <div class="receipt" style="display: flex; justify-content: space-between; align-items: center;">
             <strong id="vpaId">7075881419@ybl</strong>
-            <button class="copy-badge" onclick="copyText('7075881419@ybl', 'UPI ID')">Copy</button>
+            <button class="copy-badge" onclick="navigator.clipboard.writeText('7075881419@ybl');alert('Copied!')">Copy</button>
           </div>
         </div>
-        <div>
-          <span class="label">Account Holder</span>
-          <div class="receipt"><strong>Tulluru Chetan</strong></div>
-        </div>
+        <div><span class="label">Account Holder</span><div class="receipt"><strong>Tulluru Chetan</strong></div></div>
       </div>
       
       <div class="grid grid-2" style="margin-top:20px;">
@@ -94,58 +85,38 @@
   </div>
 
   <script>
-    function $(s, r=document){ return r.querySelector(s); }
+    const $ = (s) => document.querySelector(s);
     const pending = JSON.parse(localStorage.getItem("pendingPayment")||"null");
 
     if(!pending){
       window.location.href = "index.html";
     } else {
-      // Fix: Strictly use pending.total once.
       const exactAmount = pending.total;
       $("#displayTotal").textContent = "₹" + exactAmount;
 
-      // UPI App Redirect Logic
       const MY_VPA = "7075881419@ybl"; 
-      const MY_NAME = "Tulluru Chetan";
-      const upiUrl = `upi://pay?pa=${MY_VPA}&pn=${encodeURIComponent(MY_NAME)}&am=${exactAmount}&cu=INR&tn=${encodeURIComponent("PBR VITS " + pending.roll)}`;
+      const upiUrl = `upi://pay?pa=${MY_VPA}&pn=Tulluru%20Chetan&am=${exactAmount}&cu=INR&tn=PBR%20VITS%20${pending.roll}`;
 
-      $("#upiBtn").onclick = () => {
-        window.location.href = upiUrl;
-      };
+      $("#upiBtn").onclick = () => { window.location.href = upiUrl; };
 
-      // Timer Logic (5 Minutes)
       let timeLeft = 300; 
-      const timerElement = $("#timer");
       const countdown = setInterval(() => {
-        let minutes = Math.floor(timeLeft / 60);
-        let seconds = timeLeft % 60;
-        timerElement.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-        if (timeLeft <= 0) {
+        let min = Math.floor(timeLeft / 60);
+        let sec = timeLeft % 60;
+        $("#timer").textContent = `${min}:${sec < 10 ? '0' : ''}${sec}`;
+        if (timeLeft-- <= 0) {
           clearInterval(countdown);
-          alert("Payment session expired. Please try again.");
+          alert("Session expired.");
           window.location.href = "index.html";
         }
-        timeLeft--;
       }, 1000);
-    }
-
-    function copyText(text, label) {
-      navigator.clipboard.writeText(text);
-      alert(label + " copied!");
     }
 
     $("#confirmPay").addEventListener("click", ()=>{
       const utr = $("#utr").value.trim();
-      if(utr.length < 8){ alert("Enter a valid UTR Number"); return; }
+      if(utr.length < 8){ alert("Enter valid UTR"); return; }
       
-      const reg = {
-        id: "REG-"+Date.now(),
-        ...pending,
-        utr, 
-        note: $("#note").value.trim(), 
-        ts: new Date().toISOString()
-      };
-
+      const reg = { id: "REG-"+Date.now(), ...pending, utr, note: $("#note").value.trim(), ts: new Date().toISOString() };
       const all = JSON.parse(localStorage.getItem("registrations")||"[]");
       all.push(reg);
       localStorage.setItem("registrations", JSON.stringify(all));

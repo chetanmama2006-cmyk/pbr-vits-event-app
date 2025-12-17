@@ -1,8 +1,6 @@
-
 /* App for PBR VITS flow with sound, loader, steps, cart, payment handoff */
 const UNI = "PBR VITS";
-const SUPPORT_NUMBER = "7075881419"; // WhatsApp & support
-const BANK = { acc: "1234567890", holder: "tulluru chetan" };
+const SUPPORT_NUMBER = "7075881419"; 
 
 // WebAudio blips
 let audioCtx;
@@ -18,85 +16,101 @@ function beep(freq=700, dur=0.08){ try{
 
 const BRANCHES = ["AIML","AI","CSE","ECE","EEE","MECH","CIVIL"];
 const YEARS = ["1st Year","2nd Year","3rd Year","4th Year"];
+
+// Added 'tag' property for visual appeal
 const EVENTS = {
   Technical: [
-    { id:"hack",  name:"Hackathon",  emoji:"💻", price:300, img:"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='96' height='96'><rect rx='16' width='100%' height='100%' fill='%236b43a8'/><text x='50%' y='55%' text-anchor='middle' font-size='42' fill='white'>💻</text></svg>" },
-    { id:"robot", name:"Robo Race",  emoji:"🤖", price:250, img:"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='96' height='96'><rect rx='16' width='100%' height='100%' fill='%237a4fc7'/><text x='50%' y='55%' text-anchor='middle' font-size='42' fill='white'>🤖</text></svg>" },
-    { id:"quiz",  name:"Tech Quiz",  emoji:"🧠", price:150, img:"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='96' height='96'><rect rx='16' width='100%' height='100%' fill='%238058d9'/><text x='50%' y='55%' text-anchor='middle' font-size='42' fill='white'>🧠</text></svg>" }
+    { id:"hack",  name:"Hackathon",  emoji:"💻", price:300, tag: "🔥 Trending" },
+    { id:"robo",  name:"Robo Race",  emoji:"🤖", price:250, tag: "Filling Fast" },
+    { id:"quiz",  name:"Tech Quiz",  emoji:"❓", price:150, tag: "" }
   ],
   Cultural: [
-    { id:"dance", name:"Group Dance", emoji:"💃", price:200, img:"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='96' height='96'><rect rx='16' width='100%' height='100%' fill='%23a05bff'/><text x='50%' y='55%' text-anchor='middle' font-size='42' fill='white'>💃</text></svg>" },
-    { id:"music", name:"Solo Singing", emoji:"🎤", price:180, img:"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='96' height='96'><rect rx='16' width='100%' height='100%' fill='%23b07bff'/><text x='50%' y='55%' text-anchor='middle' font-size='42' fill='white'>🎤</text></svg>" },
-    { id:"art",   name:"Art Jam",    emoji:"🎨", price:120, img:"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='96' height='96'><rect rx='16' width='100%' height='100%' fill='%23c89cff'/><text x='50%' y='55%' text-anchor='middle' font-size='42' fill='white'>🎨</text></svg>" }
+    { id:"dance", name:"Group Dance", emoji:"💃", price:200, tag: "Popular" },
+    { id:"sing",  name:"Solo Singing",emoji:"🎤", price:120, tag: "" },
+    { id:"art",   name:"Art Jam",     emoji:"🎨", price:150, tag: "✨ New" }
   ]
 };
 
 function $(s, r=document){ return r.querySelector(s); }
 function $all(s, r=document){ return Array.from(r.querySelectorAll(s)); }
 
-// Loader
-function showLoader(ms=900, emoji="🎆"){
-  const L = $("#loader");
-  $(".bubble", L).textContent = emoji;
-  L.classList.add("show");
-  return new Promise(res=> setTimeout(()=>{ L.classList.remove("show"); res(); }, ms));
-}
-
-// Local Storage
-function getRegs(){ return JSON.parse(localStorage.getItem("registrations")||"[]"); }
-function setRegs(a){ localStorage.setItem("registrations", JSON.stringify(a)); }
-function isDupUTR(utr){ return getRegs().some(r=> r.utr.toLowerCase()===utr.toLowerCase()); }
-
-// Stepper
-function setStep(i){
-  $all(".step").forEach((el,idx)=> el.classList.toggle("active", idx===i));
-  $all("[data-step]").forEach(sec=> sec.style.display = (parseInt(sec.dataset.step,10)===i?"block":"none"));
-  window.scrollTo({top:0, behavior:"smooth"});
-}
-
-// Hydrate selects and events
 function hydrate(){
-  // Branches
-  BRANCHES.forEach(b=>{ const o=document.createElement("option"); o.value=b; o.textContent=b; $("#branch").appendChild(o); });
-  // Years
-  YEARS.forEach(y=>{ const o=document.createElement("option"); o.value=y; o.textContent=y; $("#year").appendChild(o); });
-  // Events
-  for(const [cat,list] of Object.entries(EVENTS)){
-    const wrap = document.createElement("div");
-    wrap.className = "grid";
-    wrap.innerHTML = `<h3>${cat} Events</h3>`;
-    list.forEach(ev=>{
-      const label = document.createElement("label");
-      label.className = "pill glass";
-      label.innerHTML = `
-        <input type="checkbox" name="events" value="${ev.id}" style="width:auto; margin-top:8px;" />
-        <img alt="${ev.name}" src="${ev.img}" />
-        <div>
-          <div><strong>${ev.emoji} ${ev.name}</strong> — <span class="price">₹${ev.price}</span></div>
-          <div class="small">“Create. Compete. Celebrate.”</div>
-        </div>
+  // Populate Branch
+  const bSel = $("#branch");
+  BRANCHES.forEach(b => bSel.innerHTML += `<option value="${b}">${b}</option>`);
+  
+  // Populate Year
+  const ySel = $("#year");
+  YEARS.forEach(y => ySel.innerHTML += `<option value="${y}">${y}</option>`);
+
+  // Render Events with Tags
+  const list = $("#eventList");
+  for(const cat in EVENTS){
+    const section = document.createElement("div");
+    section.innerHTML = `<h3 style="margin-bottom:10px; color:var(--accent);">${cat}</h3>`;
+    EVENTS[cat].forEach(ev => {
+      const tagHtml = ev.tag ? `<span style="font-size:0.6rem; background:var(--accent); color:var(--bg); padding:2px 6px; border-radius:10px; margin-left:8px; vertical-align:middle;">${ev.tag}</span>` : '';
+      const div = document.createElement("div");
+      div.className = "glass";
+      div.style = "padding:12px; margin-bottom:10px; display:flex; align-items:center; gap:12px; cursor:pointer; border:1px solid var(--border); border-radius:12px;";
+      div.innerHTML = `
+        <input type="checkbox" id="${ev.id}" value="${ev.id}" data-name="${ev.name}" data-price="${ev.price}" data-emoji="${ev.emoji}" style="transform:scale(1.3)" />
+        <label for="${ev.id}" style="flex:1; cursor:pointer;">
+          <strong>${ev.emoji} ${ev.name}</strong> ${tagHtml}
+          <div style="font-size:0.85rem; color:var(--muted)">Price: ₹${ev.price}</div>
+        </label>
       `;
-      wrap.appendChild(label);
-      label.addEventListener("click", ()=>{ label.classList.toggle("active"); updateCart(); beep(800, .05); });
+      div.onclick = (e) => { if(e.target.tagName!=='INPUT') { const ck=$("#"+ev.id); ck.checked=!ck.checked; updateCart(); beep(600,0.05); } };
+      section.appendChild(div);
     });
-    $("#eventList").appendChild(wrap);
+    list.appendChild(section);
   }
+  
+  $all("#eventList input").forEach(i => i.addEventListener("change", () => { updateCart(); beep(600,0.05); }));
+  
+  // Enable Auto-save for fields
+  ['name', 'roll', 'branch', 'year', 'gender'].forEach(id => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    if(sessionStorage.getItem('draft_'+id)) el.value = sessionStorage.getItem('draft_'+id);
+    el.addEventListener('input', () => sessionStorage.setItem('draft_'+id, el.value));
+  });
 }
 
-// Cart
 function getSelected(){
-  const ids = $all('input[name="events"]:checked').map(i=>i.value);
-  const map = Object.fromEntries([...EVENTS.Technical, ...EVENTS.Cultural].map(e=>[e.id,e]));
-  const items = ids.map(id=> map[id]);
-  const total = items.reduce((s,e)=> s+e.price, 0);
-  return {items,total};
+  const items = $all("#eventList input:checked").map(i => ({
+    id: i.value,
+    name: i.dataset.name,
+    price: parseInt(i.dataset.price),
+    emoji: i.dataset.emoji
+  }));
+  const total = items.reduce((sum, i) => sum + i.price, 0);
+  return { items, total };
 }
+
 function updateCart(){
-  const {items,total} = getSelected();
-  const list = items.map(i=> `<li>${i.emoji} ${i.name} — ₹${i.price}</li>`).join("");
-  $("#cartItems").innerHTML = list || "<li>No events selected yet.</li>";
-  $("#cartTotal").textContent = "₹"+total;
-  $("#proceedPay").disabled = total<=0;
+  const {items, total} = getSelected();
+  const cList = $("#cartItems");
+  cList.innerHTML = items.length ? items.map(i => `<li>${i.emoji} ${i.name} — ₹${i.price}</li>`).join('') : "<li>No events selected yet.</li>";
+  $("#cartTotal").textContent = "₹" + total;
+  $("#proceedPay").disabled = items.length === 0;
+}
+
+function setStep(idx){
+  $all("[data-step]").forEach(s => s.style.display = "none");
+  $(`[data-step="${idx}"]`).style.display = "block";
+  const dots = $all(".stepper .step");
+  dots.forEach((d, i) => {
+    d.classList.toggle("active", i <= idx);
+  });
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+async function showLoader(ms=800, emo="⏳"){
+  const l = $("#loader");
+  l.querySelector(".bubble").textContent = emo;
+  l.classList.add("active");
+  return new Promise(r => setTimeout(()=>{ l.classList.remove("active"); r(); }, ms));
 }
 
 // Validation
@@ -105,33 +119,30 @@ function validateStep0(){
   const roll = $("#roll").value.trim();
   const gender = $("#gender").value;
   const year = $("#year").value;
-  if(name.length<2){ alert("Enter a valid name"); return false; }
-  if(!/^[A-Za-z0-9\-\/]{4,}$/.test(roll)){ alert("Enter a valid roll number"); return false; }
-  if(!gender){ alert("Please select gender"); return false; }
-  if(!year){ alert("Please select year"); return false; }
-  return true;
-}
-function validateStep1(){ return !!$("#branch").value || (alert("Select branch"), false); }
-function validateStep2(){
-  const {items} = getSelected();
-  if(items.length===0){ alert("Select at least one event"); return false; }
+  if(name.length < 3){ alert("Enter valid name"); return false; }
+  if(roll.length < 4){ alert("Enter valid roll number"); return false; }
+  if(!gender || !year){ alert("Select Gender and Year"); return false; }
   return true;
 }
 
 // Navigation
 function start(){
-  hydrate(); setStep(0); updateCart();
+  hydrate(); 
+  setStep(0); 
+  updateCart();
+
   $("#next1").addEventListener("click", async ()=>{
     if(!validateStep0()) return;
-    beep(); await showLoader(900,"⏳"); setStep(1);
+    beep(); await showLoader(700,"💜"); setStep(1);
   });
+
   $("#next2").addEventListener("click", async ()=>{
-    if(!validateStep1()) return;
-    beep(760,.07); await showLoader(900,"🎉"); setStep(2);
+    if(!$("#branch").value){ alert("Select branch"); return; }
+    beep(760,.07); await showLoader(700,"✨"); setStep(2);
   });
+
   $("#proceedPay").addEventListener("click", async ()=>{
-    if(!validateStep2()) return;
-    const {items,total} = getSelected();
+    const {items, total} = getSelected();
     const payload = {
       name: $("#name").value.trim(),
       roll: $("#roll").value.trim(),
@@ -141,9 +152,9 @@ function start(){
       items, total, ts: new Date().toISOString()
     };
     localStorage.setItem("pendingPayment", JSON.stringify(payload));
-    beep(820,.08);
-    await showLoader(800,"💳");
-    window.open("payment.html", "_blank"); // new window as requested
+    beep(900, 0.1);
+    await showLoader(1000, "💸");
+    window.location.href = "payment.html";
   });
 }
 

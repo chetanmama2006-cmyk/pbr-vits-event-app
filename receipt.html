@@ -5,122 +5,63 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Receipt — PBR VITS</title>
   <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    .ticket-container { border: 2px solid var(--accent); border-radius: 20px; background: var(--glass); overflow: hidden; margin-top: 20px; }
+    .ticket-header { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: var(--bg); padding: 15px; text-align: center; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
+    .ticket-body { padding: 20px; }
+    .ticket-cut { border-top: 2px dashed var(--border); margin: 15px 0; position: relative; }
+    .ticket-cut::before, .ticket-cut::after { content: ''; position: absolute; width: 20px; height: 20px; background: var(--bg); border-radius: 50%; top: -11px; }
+    .ticket-cut::before { left: -31px; } .ticket-cut::after { right: -31px; }
+  </style>
 </head>
 <body>
   <div class="container">
     <header class="glass card popIn">
-      <h1>🧾 Registration Receipt — PBR VITS</h1>
-      <h2 class="pulse">Thank you for being part of the Purple Party!</h2>
+      <h1>🧾 Registration Success!</h1>
+      <h2 class="pulse">See you at the Party!</h2>
     </header>
 
-    <section class="glass card receipt popIn" id="receipt"></section>
-
-    <div class="glass card popIn" style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-      <button class="btn" id="btnPrint">Print</button>
-      <button class="btn" id="btnDownload">Download HTML</button>
-      <button class="btn" id="btnShareSelf">Share to My WhatsApp</button>
-      <button class="btn" id="btnShareAdmin">Send to Admin (7075881419)</button>
-      <a class="btn ghost" href="index.html">← New Registration</a>
+    <div id="receiptArea" class="ticket-container popIn">
+        <div class="ticket-header">Official Event Pass</div>
+        <div class="ticket-body" id="receipt"></div>
     </div>
 
-    <p class="footer-note">If the chatbot doesn’t recognize your message, contact support 7075881419.</p>
-  </div>
-
-  <!-- Chatbot -->
-  <div class="chatbot glass" id="chatbot">
-    <div class="window glass">
-      <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px;">
-        <strong>Fest Helper Bot 🤖</strong>
-        <button class="btn ghost" id="closeBot">Close</button>
-      </div>
-      <div class="chatlog" id="chatlog"></div>
-      <div style="display:flex; gap:8px; padding:10px;">
-        <input id="botInput" placeholder="Ask about prizes, fees, schedule..." />
-        <button class="btn" id="botSend">Send</button>
-      </div>
+    <div class="glass card popIn" style="display:flex; gap:10px; flex-wrap:wrap; margin-top:15px;">
+      <button class="btn glow" onclick="window.print()">Print Ticket</button>
+      <button class="btn ghost" id="btnShareAdmin">WhatsApp Admin</button>
+      <a class="btn ghost" href="index.html">Register Another</a>
     </div>
-    <button class="btn glow" id="openBot" style="width:100%;">Need help? Chat 💬</button>
   </div>
 
   <script>
-  function $(s, r=document){ return r.querySelector(s); }
-  function getRegs(){ return JSON.parse(localStorage.getItem("registrations")||"[]"); }
-  const lastId = localStorage.getItem("lastRegistrationId");
-  const record = getRegs().find(r=> r.id === lastId);
+    const last = JSON.parse(localStorage.getItem("lastReg") || "null");
+    if(!last) window.location.href = "index.html";
 
-  const EVENT_NAMES = {
-    hack:"Hackathon 💻", robot:"Robo Race 🤖", quiz:"Tech Quiz 🧠",
-    dance:"Group Dance 💃", music:"Solo Singing 🎤", art:"Art Jam 🎨"
-  };
+    window.onload = () => {
+        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#b07bff', '#e2b3ff', '#ffffff'] });
+    };
 
-  function render(){
-    if(!record){ $("#receipt").innerHTML = "<p>Could not find latest registration.</p>"; return; }
-    const rows = [
-      ["Reg ID", record.id],
-      ["Name", record.name],
-      ["Roll", record.roll],
-      ["Gender", record.gender],
-      ["Year", record.year],
-      ["Branch", record.branch],
-      ["Events", record.events.map(e=>EVENT_NAMES[e]||e).join(", ")],
-      ["Total Amount", "₹"+(record.total||0)],
-      ["UTR", record.utr],
-      ["Date", new Date(record.ts).toLocaleString()]
-    ].map(r=> `<tr><th>${r[0]}</th><td>${r[1]}</td></tr>`).join("");
-    $("#receipt").innerHTML = `<table class="table">${rows}</table>`;
-  }
-  render();
+    document.getElementById("receipt").innerHTML = `
+      <div style="display:flex; justify-content:space-between;">
+        <div><span class="label">STUDENT</span><div style="font-size:1.2rem; font-weight:bold;">${last.name}</div></div>
+        <div style="text-align:right;"><span class="label">REG ID</span><div style="color:var(--accent); font-family:monospace;">${last.id}</div></div>
+      </div>
+      <div style="margin-top:10px;"><span class="label">ROLL NO</span><div>${last.roll} (${last.branch})</div></div>
+      <div class="ticket-cut"></div>
+      <span class="label">EVENTS</span>
+      <ul style="list-style:none; padding:0; margin:5px 0;">${last.items.map(i => `<li>${i.emoji} ${i.name}</li>`).join('')}</ul>
+      <div class="ticket-cut"></div>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div><span class="label">UTR</span><div style="font-size:0.7rem;">${last.utr}</div></div>
+        <div style="text-align:right;"><span class="label">PAID</span><div style="font-size:1.4rem; color:var(--good); font-weight:bold;">₹${last.total}</div></div>
+      </div>
+    `;
 
-  $("#btnPrint").addEventListener("click", ()=> window.print());
-  $("#btnDownload").addEventListener("click", ()=>{
-    const blob = new Blob([document.documentElement.outerHTML], {type:"text/html"});
-    const url = URL.createObjectURL(blob); const a=document.createElement("a");
-    a.href = url; a.download = (record?.id || "receipt") + ".html"; a.click(); URL.revokeObjectURL(url);
-  });
-
-  function share(toAdmin=false){
-    if(!record) return;
-    const text = [
-      "PBR VITS Registration ✅",
-      `Reg ID: ${record.id}`,
-      `Name: ${record.name}`,
-      `Roll: ${record.roll}`,
-      `Gender: ${record.gender}`,
-      `Year: ${record.year}`,
-      `Branch: ${record.branch}`,
-      `Events: ${record.events.map(e=>EVENT_NAMES[e]||e).join(", ")}`,
-      `Total: ₹${record.total||0}`,
-      `UTR: ${record.utr}`,
-      `Date: ${new Date(record.ts).toLocaleString()}`
-    ].join("\n");
-    const num = toAdmin ? "7075881419" : "";
-    const url = num ? `https://wa.me/${num}?text=${encodeURIComponent(text)}` : `https://wa.me/?text=${encodeURIComponent(text)}`;
-    window.open(url, "_blank");
-  }
-  $("#btnShareSelf").addEventListener("click", ()=> share(false));
-  $("#btnShareAdmin").addEventListener("click", ()=> share(true));
-
-  // --- Chatbot ---
-  const SUPPORT = "If I didn't get that, please contact support at 7075881419.";
-  const bot = {
-    greet(){ return "Hi! Ask me about events, prizes, fees, schedule, or UTR."; },
-    reply(q){
-      const m=q.toLowerCase();
-      if(/prize|prizes|award/.test(m)) return "Prizes vary by event. Tech: gadgets & vouchers; Cultural: trophies & certificates.";
-      if(/event|available|list/.test(m)) return "Technical: Hackathon, Robo Race, Tech Quiz. Cultural: Group Dance, Solo Singing, Art Jam.";
-      if(/fee|price|cost|amount|total/.test(m)) return `Your receipt shows totals; typical range ₹120–₹300 per event.`;
-      if(/schedule|time|when/.test(m)) return "Schedules are announced via notice board and WhatsApp groups.";
-      if(/register|how/.test(m)) return "Fill details → choose branch → select events → pay via bank transfer → enter UTR → download receipt.";
-      if(/contact|support|help/.test(m)) return "Reach support at 7075881419.";
-      return "Sorry, I couldn't recognize that. " + SUPPORT;
-    }
-  };
-  const chatlog = $("#chatlog");
-  function push(text, who="bot"){ const d=document.createElement("div"); d.className="msg "+who; d.textContent=text; chatlog.appendChild(d); chatlog.scrollTop = chatlog.scrollHeight; }
-  $("#openBot").addEventListener("click", ()=>{ $("#chatbot").classList.add("open"); if(chatlog.childElementCount===0) push(bot.greet(),"bot"); });
-  $("#closeBot").addEventListener("click", ()=> $("#chatbot").classList.remove("open"));
-  $("#botSend").addEventListener("click", ()=>{ const v=$("#botInput").value.trim(); if(!v) return; push(v,"user"); setTimeout(()=> push(bot.reply(v),"bot"), 250); $("#botInput").value=""; });
-  $("#botInput").addEventListener("keydown", e=>{ if(e.key==="Enter") $("#botSend").click(); });
+    document.getElementById("btnShareAdmin").onclick = () => {
+        const msg = `Registration Confirmed!\nName: ${last.name}\nRoll: ${last.roll}\nUTR: ${last.utr}`;
+        window.open(`https://wa.me/7075881419?text=${encodeURIComponent(msg)}`);
+    };
   </script>
 </body>
 </html>
