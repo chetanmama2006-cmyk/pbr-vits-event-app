@@ -3,64 +3,51 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Receipt — PBR VITS</title>
+  <title>Ticket — PBR VITS</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <style>
-    .ticket-container { border: 2px solid var(--accent); border-radius: 20px; background: var(--glass); overflow: hidden; margin-top: 20px; }
-    .ticket-header { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: var(--bg); padding: 15px; text-align: center; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
-    .ticket-body { padding: 20px; }
-    .ticket-cut { border-top: 2px dashed var(--border); margin: 15px 0; position: relative; }
-    .ticket-cut::before, .ticket-cut::after { content: ''; position: absolute; width: 20px; height: 20px; background: var(--bg); border-radius: 50%; top: -11px; }
-    .ticket-cut::before { left: -31px; } .ticket-cut::after { right: -31px; }
+    .ticket { border: 2px solid var(--accent); border-radius: 20px; background: var(--glass); overflow: hidden; margin-top: 20px; }
+    .ticket-h { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: var(--bg); padding: 12px; text-align: center; font-weight: bold; letter-spacing: 2px; }
+    .ticket-b { padding: 20px; }
+    .cut { border-top: 2px dashed var(--border); margin: 15px 0; position: relative; }
+    .cut::before, .cut::after { content: ''; position: absolute; width: 20px; height: 20px; background: var(--bg); border-radius: 50%; top: -11px; }
+    .cut::before { left: -31px; } .cut::after { right: -31px; }
   </style>
 </head>
 <body>
   <div class="container">
-    <header class="glass card popIn">
-      <h1>🧾 Registration Success!</h1>
-      <h2 class="pulse">See you at the Party!</h2>
-    </header>
-
-    <div id="receiptArea" class="ticket-container popIn">
-        <div class="ticket-header">Official Event Pass</div>
-        <div class="ticket-body" id="receipt"></div>
+    <header class="glass card popIn"><h1>🎉 Success!</h1></header>
+    <div class="ticket popIn">
+        <div class="ticket-h">EVENT PASS</div>
+        <div class="ticket-b" id="out"></div>
     </div>
-
-    <div class="glass card popIn" style="display:flex; gap:10px; flex-wrap:wrap; margin-top:15px;">
+    <div class="glass card popIn" style="display:flex; gap:10px; margin-top:15px; flex-direction:column;">
       <button class="btn glow" onclick="window.print()">Print Ticket</button>
-      <button class="btn ghost" id="btnShareAdmin">WhatsApp Admin</button>
-      <a class="btn ghost" href="index.html">Register Another</a>
+      <button class="btn ghost" id="share">Share with Admin</button>
+      <a class="btn ghost" href="index.html" style="text-align:center;">Register Another</a>
     </div>
   </div>
-
   <script>
-    const last = JSON.parse(localStorage.getItem("lastReg") || "null");
-    if(!last) window.location.href = "index.html";
-
-    window.onload = () => {
-        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#b07bff', '#e2b3ff', '#ffffff'] });
-    };
-
-    document.getElementById("receipt").innerHTML = `
+    const last = JSON.parse(localStorage.getItem("lastReg")||"null");
+    if(!last) window.location.href="index.html";
+    window.onload = () => confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#b07bff', '#ffffff'] });
+    document.getElementById("out").innerHTML = `
       <div style="display:flex; justify-content:space-between;">
-        <div><span class="label">STUDENT</span><div style="font-size:1.2rem; font-weight:bold;">${last.name}</div></div>
-        <div style="text-align:right;"><span class="label">REG ID</span><div style="color:var(--accent); font-family:monospace;">${last.id}</div></div>
+        <div><span class="label">STUDENT</span><div style="font-weight:bold;">${last.name}</div></div>
+        <div style="text-align:right;"><span class="label">ID</span><div>${last.id}</div></div>
       </div>
-      <div style="margin-top:10px;"><span class="label">ROLL NO</span><div>${last.roll} (${last.branch})</div></div>
-      <div class="ticket-cut"></div>
+      <div class="cut"></div>
       <span class="label">EVENTS</span>
-      <ul style="list-style:none; padding:0; margin:5px 0;">${last.items.map(i => `<li>${i.emoji} ${i.name}</li>`).join('')}</ul>
-      <div class="ticket-cut"></div>
+      <ul style="list-style:none; padding:0;">${last.items.map(i=>`<li>${i.emoji} ${i.name}</li>`).join('')}</ul>
+      <div class="cut"></div>
       <div style="display:flex; justify-content:space-between; align-items:center;">
-        <div><span class="label">UTR</span><div style="font-size:0.7rem;">${last.utr}</div></div>
-        <div style="text-align:right;"><span class="label">PAID</span><div style="font-size:1.4rem; color:var(--good); font-weight:bold;">₹${last.total}</div></div>
+        <span class="label">PAID</span>
+        <div style="font-size:1.5rem; color:var(--good); font-weight:bold;">₹${last.total}</div>
       </div>
     `;
-
-    document.getElementById("btnShareAdmin").onclick = () => {
-        const msg = `Registration Confirmed!\nName: ${last.name}\nRoll: ${last.roll}\nUTR: ${last.utr}`;
-        window.open(`https://wa.me/7075881419?text=${encodeURIComponent(msg)}`);
+    document.getElementById("share").onclick = () => {
+      window.open(`https://wa.me/7075881419?text=Confirmed!%20Name:%20${last.name}%20UTR:%20${last.utr}`);
     };
   </script>
 </body>

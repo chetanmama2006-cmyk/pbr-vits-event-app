@@ -1,8 +1,7 @@
-/* App for PBR VITS flow with sound, loader, steps, cart, payment handoff */
+/* App for PBR VITS flow - Full Upgrade */
 const UNI = "PBR VITS";
 const SUPPORT_NUMBER = "7075881419"; 
 
-// WebAudio blips
 let audioCtx;
 function beep(freq=700, dur=0.08){ try{
   if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
@@ -17,7 +16,6 @@ function beep(freq=700, dur=0.08){ try{
 const BRANCHES = ["AIML","AI","CSE","ECE","EEE","MECH","CIVIL"];
 const YEARS = ["1st Year","2nd Year","3rd Year","4th Year"];
 
-// Added 'tag' property for visual appeal
 const EVENTS = {
   Technical: [
     { id:"hack",  name:"Hackathon",  emoji:"💻", price:300, tag: "🔥 Trending" },
@@ -34,16 +32,21 @@ const EVENTS = {
 function $(s, r=document){ return r.querySelector(s); }
 function $all(s, r=document){ return Array.from(r.querySelectorAll(s)); }
 
+// Error shake logic
+function shake(id) {
+    const el = document.getElementById(id);
+    el.classList.add('error-shake');
+    setTimeout(() => el.classList.remove('error-shake'), 400);
+    beep(200, 0.2);
+}
+
 function hydrate(){
-  // Populate Branch
   const bSel = $("#branch");
   BRANCHES.forEach(b => bSel.innerHTML += `<option value="${b}">${b}</option>`);
   
-  // Populate Year
   const ySel = $("#year");
   YEARS.forEach(y => ySel.innerHTML += `<option value="${y}">${y}</option>`);
 
-  // Render Events with Tags
   const list = $("#eventList");
   for(const cat in EVENTS){
     const section = document.createElement("div");
@@ -67,31 +70,27 @@ function hydrate(){
   }
   
   $all("#eventList input").forEach(i => i.addEventListener("change", () => { updateCart(); beep(600,0.05); }));
-  
-  // Enable Auto-save for fields
+
+  // AUTO-SAVE logic
   ['name', 'roll', 'branch', 'year', 'gender'].forEach(id => {
     const el = document.getElementById(id);
     if(!el) return;
-    if(sessionStorage.getItem('draft_'+id)) el.value = sessionStorage.getItem('draft_'+id);
+    const saved = sessionStorage.getItem('draft_'+id);
+    if(saved) el.value = saved;
     el.addEventListener('input', () => sessionStorage.setItem('draft_'+id, el.value));
   });
 }
 
 function getSelected(){
   const items = $all("#eventList input:checked").map(i => ({
-    id: i.value,
-    name: i.dataset.name,
-    price: parseInt(i.dataset.price),
-    emoji: i.dataset.emoji
+    id: i.value, name: i.dataset.name, price: parseInt(i.dataset.price), emoji: i.dataset.emoji
   }));
-  const total = items.reduce((sum, i) => sum + i.price, 0);
-  return { items, total };
+  return { items, total: items.reduce((sum, i) => sum + i.price, 0) };
 }
 
 function updateCart(){
   const {items, total} = getSelected();
-  const cList = $("#cartItems");
-  cList.innerHTML = items.length ? items.map(i => `<li>${i.emoji} ${i.name} — ₹${i.price}</li>`).join('') : "<li>No events selected yet.</li>";
+  $("#cartItems").innerHTML = items.length ? items.map(i => `<li>${i.emoji} ${i.name} — ₹${i.price}</li>`).join('') : "<li>No events selected yet.</li>";
   $("#cartTotal").textContent = "₹" + total;
   $("#proceedPay").disabled = items.length === 0;
 }
@@ -99,10 +98,7 @@ function updateCart(){
 function setStep(idx){
   $all("[data-step]").forEach(s => s.style.display = "none");
   $(`[data-step="${idx}"]`).style.display = "block";
-  const dots = $all(".stepper .step");
-  dots.forEach((d, i) => {
-    d.classList.toggle("active", i <= idx);
-  });
+  $all(".stepper .step").forEach((d, i) => d.classList.toggle("active", i <= idx));
   window.scrollTo({top:0, behavior:'smooth'});
 }
 
@@ -113,49 +109,30 @@ async function showLoader(ms=800, emo="⏳"){
   return new Promise(r => setTimeout(()=>{ l.classList.remove("active"); r(); }, ms));
 }
 
-// Validation
-function validateStep0(){
-  const name = $("#name").value.trim();
-  const roll = $("#roll").value.trim();
-  const gender = $("#gender").value;
-  const year = $("#year").value;
-  if(name.length < 3){ alert("Enter valid name"); return false; }
-  if(roll.length < 4){ alert("Enter valid roll number"); return false; }
-  if(!gender || !year){ alert("Select Gender and Year"); return false; }
-  return true;
-}
-
-// Navigation
 function start(){
-  hydrate(); 
-  setStep(0); 
-  updateCart();
+  hydrate(); setStep(0); updateCart();
 
   $("#next1").addEventListener("click", async ()=>{
-    if(!validateStep0()) return;
+    if(!$("#name").value.trim()){ shake("name"); return; }
+    if(!$("#roll").value.trim()){ shake("roll"); return; }
     beep(); await showLoader(700,"💜"); setStep(1);
   });
 
   $("#next2").addEventListener("click", async ()=>{
-    if(!$("#branch").value){ alert("Select branch"); return; }
+    if(!$("#branch").value){ shake("branch"); return; }
     beep(760,.07); await showLoader(700,"✨"); setStep(2);
   });
 
   $("#proceedPay").addEventListener("click", async ()=>{
     const {items, total} = getSelected();
     const payload = {
-      name: $("#name").value.trim(),
-      roll: $("#roll").value.trim(),
-      gender: $("#gender").value,
-      year: $("#year").value,
-      branch: $("#branch").value,
+      name: $("#name").value.trim(), roll: $("#roll").value.trim(),
+      gender: $("#gender").value, year: $("#year").value, branch: $("#branch").value,
       items, total, ts: new Date().toISOString()
     };
     localStorage.setItem("pendingPayment", JSON.stringify(payload));
-    beep(900, 0.1);
-    await showLoader(1000, "💸");
+    beep(900, 0.1); await showLoader(1000, "💸");
     window.location.href = "payment.html";
   });
 }
-
 document.addEventListener("DOMContentLoaded", start);

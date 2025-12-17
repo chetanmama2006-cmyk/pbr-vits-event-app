@@ -6,124 +6,64 @@
   <title>Payment — PBR VITS</title>
   <link rel="stylesheet" href="style.css" />
   <style>
-    .copy-badge {
-      background: var(--accent);
-      color: var(--bg);
-      font-size: 0.7rem;
-      padding: 2px 6px;
-      border-radius: 4px;
-      cursor: pointer;
-      margin-left: 8px;
-      font-weight: bold;
-      vertical-align: middle;
-    }
-    .copy-badge:active { transform: scale(0.9); }
-    .timer-box {
-        background: rgba(255, 107, 107, 0.15);
-        border: 1px solid var(--bad);
-        padding: 8px;
-        border-radius: 12px;
-        margin-bottom: 15px;
-        text-align: center;
-        color: var(--bad);
-        font-weight: bold;
-    }
+    .copy-badge { background: var(--accent); color: var(--bg); font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; cursor: pointer; margin-left: 8px; font-weight: bold; }
+    .timer-box { background: rgba(255, 107, 107, 0.15); border: 1px solid var(--bad); padding: 8px; border-radius: 12px; margin-bottom: 15px; text-align: center; color: var(--bad); font-weight: bold; }
   </style>
 </head>
 <body>
   <div class="container">
     <header class="glass card popIn">
-      <h1>💳 Payment Instructions</h1>
-      <div class="timer-box">
-        ⏳ Session Expires In: <span id="timer">05:00</span>
-      </div>
-      <div class="glass" style="margin-top: 15px; padding: 15px; border: 1px solid var(--accent); border-radius: 16px; text-align: center;">
-        <span class="label" style="display: block; margin-bottom: 5px; font-size: 0.9rem;">Total Amount to Pay</span>
-        <h1 id="displayTotal" style="margin: 0; color: var(--good); font-size: 2.8rem; letter-spacing: -1px;">₹0</h1>
+      <h1>💳 Payment</h1>
+      <div class="timer-box">⏳ Session Expires: <span id="timer">05:00</span></div>
+      <div class="glass" style="padding:15px; border:1px solid var(--accent); border-radius:16px; text-align:center;">
+        <span class="label">Total Amount</span>
+        <h1 id="displayTotal" style="margin:0; color:var(--good); font-size:2.8rem;">₹0</h1>
       </div>
     </header>
 
     <section class="glass card popIn">
-      <div id="upiRedirectSection">
-        <h2>Pay using UPI App</h2>
-        <p class="footer-note">Directly opens GPay, PhonePe, or Paytm with the correct amount.</p>
-        <button id="upiBtn" class="btn glow" style="width: 100%; background: linear-gradient(135deg, #673ab7, #9c27b0); margin-bottom: 20px;">
-          🚀 Open UPI App to Pay
-        </button>
-        <div style="border-bottom: 1px solid var(--border); margin: 20px 0; position: relative; text-align: center;">
-            <span style="background: var(--bg); padding: 0 10px; position: relative; top: 10px; font-size: 0.8rem; color: var(--muted);">OR MANUAL TRANSFER</span>
-        </div>
-      </div>
-
+      <button id="upiBtn" class="btn glow" style="width:100%; background:linear-gradient(135deg, #673ab7, #9c27b0); margin-bottom:20px;">🚀 Open UPI App (GPay/PhonePe)</button>
       <div class="grid grid-2">
-        <div>
-          <span class="label">UPI ID</span>
-          <div class="receipt" style="display: flex; justify-content: space-between; align-items: center;">
-            <strong id="vpaId">7075881419@ybl</strong>
-            <button class="copy-badge" onclick="navigator.clipboard.writeText('7075881419@ybl');alert('Copied!')">Copy</button>
-          </div>
-        </div>
-        <div><span class="label">Account Holder</span><div class="receipt"><strong>Tulluru Chetan</strong></div></div>
+        <div><span class="label">UPI ID</span><div class="receipt"><strong>7075881419@ybl</strong></div></div>
+        <div><span class="label">Holder</span><div class="receipt"><strong>T. Chetan</strong></div></div>
       </div>
-      
       <div class="grid grid-2" style="margin-top:20px;">
-        <div>
-          <label class="label" for="utr">Enter UTR Number</label>
-          <input id="utr" placeholder="12-digit Transaction ID" />
-        </div>
-        <div>
-          <label class="label" for="note">Note (optional)</label>
-          <input id="note" placeholder="Your name" />
-        </div>
+        <input id="utr" placeholder="12-digit UTR Number" />
+        <input id="note" placeholder="Note (Optional)" />
       </div>
-
-      <div style="margin-top:20px; display:flex; gap:10px; flex-direction: column;">
-        <button id="confirmPay" class="btn glow" style="width: 100%;">Confirm Payment</button>
-        <a href="index.html" class="btn ghost" style="text-align: center;">← Cancel</a>
-      </div>
+      <button id="confirmPay" class="btn glow" style="width:100%; margin-top:15px;">Confirm Payment</button>
+      <a href="index.html" class="btn ghost" style="width:100%; text-align:center; margin-top:10px;">← Cancel</a>
     </section>
   </div>
 
   <script>
-    const $ = (s) => document.querySelector(s);
     const pending = JSON.parse(localStorage.getItem("pendingPayment")||"null");
+    if(!pending) window.location.href="index.html";
+    
+    const amt = pending.total;
+    document.getElementById("displayTotal").textContent = "₹" + amt;
 
-    if(!pending){
-      window.location.href = "index.html";
-    } else {
-      const exactAmount = pending.total;
-      $("#displayTotal").textContent = "₹" + exactAmount;
+    document.getElementById("upiBtn").onclick = () => {
+      window.location.href = `upi://pay?pa=7075881419@ybl&pn=Tulluru%20Chetan&am=${amt}&cu=INR&tn=PBR%20VITS%20${pending.roll}`;
+    };
 
-      const MY_VPA = "7075881419@ybl"; 
-      const upiUrl = `upi://pay?pa=${MY_VPA}&pn=Tulluru%20Chetan&am=${exactAmount}&cu=INR&tn=PBR%20VITS%20${pending.roll}`;
+    let time = 300;
+    const itv = setInterval(() => {
+      let m = Math.floor(time/60), s = time%60;
+      document.getElementById("timer").textContent = `${m}:${s<10?'0':''}${s}`;
+      if(time-- <= 0){ clearInterval(itv); alert("Expired"); window.location.href="index.html"; }
+    }, 1000);
 
-      $("#upiBtn").onclick = () => { window.location.href = upiUrl; };
-
-      let timeLeft = 300; 
-      const countdown = setInterval(() => {
-        let min = Math.floor(timeLeft / 60);
-        let sec = timeLeft % 60;
-        $("#timer").textContent = `${min}:${sec < 10 ? '0' : ''}${sec}`;
-        if (timeLeft-- <= 0) {
-          clearInterval(countdown);
-          alert("Session expired.");
-          window.location.href = "index.html";
-        }
-      }, 1000);
-    }
-
-    $("#confirmPay").addEventListener("click", ()=>{
-      const utr = $("#utr").value.trim();
-      if(utr.length < 8){ alert("Enter valid UTR"); return; }
-      
-      const reg = { id: "REG-"+Date.now(), ...pending, utr, note: $("#note").value.trim(), ts: new Date().toISOString() };
+    document.getElementById("confirmPay").onclick = () => {
+      const u = document.getElementById("utr").value.trim();
+      if(u.length < 8) return alert("Invalid UTR");
+      const reg = { id:"REG-"+Date.now(), ...pending, utr:u, ts:new Date().toISOString() };
       const all = JSON.parse(localStorage.getItem("registrations")||"[]");
       all.push(reg);
       localStorage.setItem("registrations", JSON.stringify(all));
-      localStorage.removeItem("pendingPayment");
       localStorage.setItem("lastReg", JSON.stringify(reg));
       window.location.href = "receipt.html";
-    });
+    };
   </script>
 </body>
 </html>
