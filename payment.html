@@ -18,6 +18,7 @@
       vertical-align: middle;
     }
     .copy-badge:active { transform: scale(0.9); }
+    .upi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-top: 15px; }
   </style>
 </head>
 <body>
@@ -32,13 +33,23 @@
     </header>
 
     <section class="glass card popIn">
+      <div id="upiRedirectSection">
+        <h2>Pay using UPI App</h2>
+        <p class="footer-note">Recommended for Mobile: Click below to open your payment app directly.</p>
+        <button id="upiBtn" class="btn glow" style="width: 100%; background: linear-gradient(135deg, #673ab7, #9c27b0); margin-bottom: 20px;">
+          🚀 Open UPI App (GPay/PhonePe)
+        </button>
+        <div style="border-bottom: 1px solid var(--border); margin: 20px 0; position: relative; text-align: center;">
+            <span style="background: var(--bg); padding: 0 10px; position: relative; top: 10px; font-size: 0.8rem; color: var(--muted);">OR USE BANK DETAILS</span>
+        </div>
+      </div>
+
       <h2>Bank Transfer Details</h2>
       <div class="grid grid-2">
         <div>
-          <span class="label">Bank Transfer Account Number</span>
+          <span class="label">UPI ID / VPA</span>
           <div class="receipt" style="display: flex; justify-content: space-between; align-items: center;">
-            <strong id="accNum">1234567890</strong>
-            <button class="copy-badge" onclick="copyText('1234567890', 'Account Number')">Copy</button>
+            <strong id="vpaId">7075881419@ybl</strong> <button class="copy-badge" onclick="copyText('7075881419@ybl', 'UPI ID')">Copy</button>
           </div>
         </div>
         <div>
@@ -47,16 +58,16 @@
         </div>
       </div>
       
-      <p class="footer-note">1. Open your payment app (PhonePe/GPay/Paytm).<br>2. Transfer the <b>Total Amount</b> shown above.<br>3. Paste the <b>UTR / Transaction ID</b> below.</p>
+      <p class="footer-note" style="margin-top:15px;">1. Transfer the <b>Total Amount</b> shown above.<br>2. Paste the <b>UTR / Transaction ID</b> below to confirm.</p>
       
       <div class="grid grid-2">
         <div>
           <label class="label" for="utr">Enter UTR Number</label>
-          <input id="utr" placeholder="e.g., AXIS9A1B2C" />
+          <input id="utr" placeholder="e.g., 412345678901" />
         </div>
         <div>
           <label class="label" for="note">Note (optional)</label>
-          <input id="note" placeholder="Any message for admin" />
+          <input id="note" placeholder="Your name or roll no" />
         </div>
       </div>
 
@@ -75,27 +86,38 @@
 
     const pending = JSON.parse(localStorage.getItem("pendingPayment")||"null");
     
+    // CONFIG: REPLACE THIS WITH YOUR REAL UPI ID
+    const MY_VPA = "7075881419@ybl"; 
+    const MY_NAME = "Tulluru Chetan";
+
     if(!pending){
-      alert("No pending cart found. Please start from registration page.");
+      alert("No pending cart found.");
       window.location.href = "index.html";
     } else {
-      // Display the dynamic total from the cart
       $("#displayTotal").textContent = "₹" + pending.total;
+      
+      // UPI Intent Link Generation
+      // format: upi://pay?pa=VPA&pn=NAME&am=AMOUNT&cu=INR&tn=NOTE
+      const upiUrl = `upi://pay?pa=${MY_VPA}&pn=${encodeURIComponent(MY_NAME)}&am=${pending.total}&cu=INR&tn=${encodeURIComponent("PBR VITS " + pending.roll)}`;
+      
+      $("#upiBtn").onclick = () => {
+        window.location.href = upiUrl;
+      };
     }
 
     function copyText(text, label) {
       navigator.clipboard.writeText(text);
-      alert(label + " copied to clipboard!");
+      alert(label + " copied!");
     }
 
     $("#confirmPay").addEventListener("click", ()=>{
       const utr = $("#utr").value.trim();
-      if(!/^[A-Za-z0-9]{8,}$/.test(utr)){ 
-        alert("Enter a valid UTR (min 8 alphanumeric characters)"); 
+      if(utr.length < 8){ 
+        alert("Please enter a valid 12-digit UTR number from your payment app."); 
         return; 
       }
       if(isDupUTR(utr)){ 
-        alert("This UTR has already been used. If this is an error, contact support 7075881419."); 
+        alert("This UTR has already been used."); 
         return; 
       }
 
@@ -118,7 +140,6 @@
       all.push(reg);
       setRegs(all);
 
-      // Clear pending and go to receipt
       localStorage.removeItem("pendingPayment");
       localStorage.setItem("lastReg", JSON.stringify(reg));
       window.location.href = "receipt.html";
