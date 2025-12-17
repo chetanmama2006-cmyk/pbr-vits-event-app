@@ -1,4 +1,4 @@
-/* App for PBR VITS — Fully Optimized Selection */
+/* App for PBR VITS — Clean UI & Animated Cart */
 const UNI = "PBR VITS";
 const SUPPORT_NUMBER = "7075881419"; 
 
@@ -18,14 +18,14 @@ const YEARS = ["1st Year","2nd Year","3rd Year","4th Year"];
 
 const EVENTS = {
   Technical: [
-    { id:"hack",  name:"Hackathon",  emoji:"💻", price:300, tag: "🔥 Trending" },
-    { id:"robo",  name:"Robo Race",  emoji:"🤖", price:250, tag: "Filling Fast" },
-    { id:"quiz",  name:"Tech Quiz",  emoji:"❓", price:150, tag: "" }
+    { id:"hack",  name:"Hackathon",  emoji:"💻", price:300 },
+    { id:"robo",  name:"Robo Race",  emoji:"🤖", price:250 },
+    { id:"quiz",  name:"Tech Quiz",  emoji:"❓", price:150 }
   ],
   Cultural: [
-    { id:"dance", name:"Group Dance", emoji:"💃", price:200, tag: "Popular" },
-    { id:"sing",  name:"Solo Singing",emoji:"🎤", price:120, tag: "" },
-    { id:"art",   name:"Art Jam",     emoji:"🎨", price:150, tag: "✨ New" }
+    { id:"dance", name:"Group Dance", emoji:"💃", price:200 },
+    { id:"sing",  name:"Solo Singing",emoji:"🎤", price:120 },
+    { id:"art",   name:"Art Jam",     emoji:"🎨", price:150 }
   ]
 };
 
@@ -41,32 +41,35 @@ function hydrate(){
   const list = $("#eventList");
   for(const cat in EVENTS){
     const section = document.createElement("div");
-    section.innerHTML = `<h3 style="margin: 12px 0 6px 0; color:var(--accent); font-size:0.95rem; border-left:3px solid var(--accent); padding-left:10px;">${cat}</h3>`;
+    section.innerHTML = `<h3 style="margin: 15px 0 8px 0; color:var(--accent); font-size:1rem; border-left:3px solid var(--accent); padding-left:10px;">${cat}</h3>`;
     
     EVENTS[cat].forEach(ev => {
-      const tagHtml = ev.tag ? `<span style="font-size:0.55rem; background:var(--accent); color:var(--bg); padding:2px 5px; border-radius:4px; margin-left:8px; font-weight:bold;">${ev.tag}</span>` : '';
-      
       const card = document.createElement("div");
       card.className = "glass";
-      card.style = "padding:8px 12px; margin-bottom:6px; display:flex; align-items:center; gap:12px; cursor:pointer; border:1px solid var(--border); border-radius:12px; transition:0.2s;";
+      card.style = "padding:12px; margin-bottom:8px; display:flex; align-items:center; gap:12px; cursor:pointer; border:1px solid var(--border); border-radius:12px; transition:0.2s;";
       
       card.innerHTML = `
         <input type="checkbox" id="${ev.id}" value="${ev.id}" data-name="${ev.name}" data-price="${ev.price}" data-emoji="${ev.emoji}" style="width:18px; height:18px; pointer-events:none;" />
         <div style="flex:1;">
           <div style="display:flex; align-items:center;">
-            <strong style="font-size:0.85rem;">${ev.emoji} ${ev.name}</strong> 
-            ${tagHtml}
+            <strong style="font-size:0.95rem;">${ev.emoji} ${ev.name}</strong> 
           </div>
-          <div style="font-size:0.75rem; color:var(--muted)">Registration: ₹${ev.price}</div>
+          <div style="font-size:0.8rem; color:var(--muted)">Registration: ₹${ev.price}</div>
         </div>
       `;
 
-      // CLICK ANYWHERE ON CARD LOGIC
       card.onclick = () => {
         const checkbox = card.querySelector('input');
         checkbox.checked = !checkbox.checked;
         card.style.borderColor = checkbox.checked ? "var(--accent)" : "var(--border)";
         card.style.background = checkbox.checked ? "rgba(176,123,255,0.08)" : "var(--glass)";
+        
+        // Trigger Cart Animation
+        const cartEl = $(".cart");
+        cartEl.classList.remove("cart-bump");
+        void cartEl.offsetWidth; // Force reflow
+        cartEl.classList.add("cart-bump");
+        
         updateCart();
         beep(600, 0.05);
       };
@@ -92,7 +95,7 @@ function getSelected(){
 
 function updateCart(){
   const {items, total} = getSelected();
-  $("#cartItems").innerHTML = items.length ? items.map(i => `<li style="font-size:0.8rem; margin-bottom:2px;">${i.emoji} ${i.name}</li>`).join('') : "<li>No items</li>";
+  $("#cartItems").innerHTML = items.length ? items.map(i => `<li style="font-size:0.85rem; margin-bottom:4px; list-style:none;">✅ ${i.name}</li>`).join('') : "<li style='list-style:none; color:var(--muted)'>Empty</li>";
   $("#cartTotal").textContent = "₹" + total;
   $("#proceedPay").disabled = items.length === 0;
 }

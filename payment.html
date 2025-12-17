@@ -20,7 +20,7 @@
       </div>
     </header>
     <section class="glass card popIn">
-      <button id="upiBtn" class="btn glow" style="width:100%; background:linear-gradient(135deg, #673ab7, #9c27b0); margin-bottom:15px;">🚀 Open GPay / PhonePe</button>
+      <button id="upiBtn" class="btn glow" style="width:100%; background:linear-gradient(135deg, #673ab7, #9c27b0); margin-bottom:15px;">🚀 Open UPI App</button>
       <div class="grid grid-2">
         <div><span class="label">UPI ID</span><div class="receipt">7075881419@ybl</div></div>
         <div><span class="label">Holder</span><div class="receipt">T. Chetan</div></div>
@@ -35,13 +35,11 @@
   <script>
     const pending = JSON.parse(localStorage.getItem("pendingPayment")||"null");
     if(!pending) window.location.href="index.html";
-    
-    // STRICT FIX FOR AMOUNT
-    const finalAmount = pending.total; 
-    document.getElementById("displayTotal").textContent = "₹" + finalAmount;
+    const amt = pending.total; 
+    document.getElementById("displayTotal").textContent = "₹" + amt;
 
     document.getElementById("upiBtn").onclick = () => {
-      window.location.href = `upi://pay?pa=7075881419@ybl&pn=Tulluru%20Chetan&am=${finalAmount}&cu=INR&tn=PBRVITS_${pending.roll}`;
+      window.location.href = `upi://pay?pa=7075881419@ybl&pn=Tulluru%20Chetan&am=${amt}&cu=INR&tn=PBRVITS_${pending.roll}`;
     };
 
     let time = 300;
@@ -54,11 +52,7 @@
     document.getElementById("confirmPay").onclick = () => {
       const u = document.getElementById("utr").value.trim();
       if(u.length < 8) return alert("Invalid UTR");
-      
-      // NEW REG ID FORMAT
-      const rand = Math.floor(1000 + Math.random() * 9000);
-      const regId = `PBR-2025-${rand}`;
-
+      const regId = `PBR-2025-${Math.floor(1000 + Math.random() * 9000)}`;
       const reg = { id: regId, ...pending, utr:u, ts:new Date().toISOString() };
       const all = JSON.parse(localStorage.getItem("registrations")||"[]");
       all.push(reg);

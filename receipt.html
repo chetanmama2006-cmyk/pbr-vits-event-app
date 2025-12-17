@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <style>
-    .ticket { border: 2px solid var(--accent); border-radius: 20px; background: var(--glass); overflow: hidden; margin-top: 20px; box-shadow: var(--shadow); }
+    .ticket { border: 2px solid var(--accent); border-radius: 20px; background: var(--glass); overflow: hidden; margin-top: 20px; }
     .ticket-h { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: var(--bg); padding: 12px; text-align: center; font-weight: bold; }
     .ticket-b { padding: 20px; }
     .cut { border-top: 2px dashed var(--border); margin: 15px 0; position: relative; }
@@ -41,7 +41,7 @@
       <div style="margin-top:8px;"><span class="label">ROLL & BRANCH</span><div>${last.roll} (${last.branch})</div></div>
       <div class="cut"></div>
       <span class="label">EVENTS</span>
-      <ul style="list-style:none; padding:0; margin:5px 0;">${last.items.map(i=>`<li>${i.emoji} ${i.name}</li>`).join('')}</ul>
+      <ul style="list-style:none; padding:0; margin:5px 0;">${last.items.map(i=>`<li>✅ ${i.name}</li>`).join('')}</ul>
       <div class="cut"></div>
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <div><span class="label">UTR</span><div style="font-size:0.75rem;">${last.utr}</div></div>
@@ -54,7 +54,7 @@
                   `*Name:* ${last.name}%0A*Roll:* ${last.roll}%0A*Branch:* ${last.branch}%0A` +
                   `*Events:* ${last.items.map(i=>i.name).join(", ")}%0A` +
                   `*Total:* ₹${last.total}%0A*UTR:* ${last.utr}%0A*Reg ID:* ${last.id}%0A` +
-                  `Please verify my payment.`;
+                  `Verified Payment Status.`;
       window.open(`https://wa.me/7075881419?text=${msg}`);
     };
   </script>
