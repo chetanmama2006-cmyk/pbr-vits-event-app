@@ -1,4 +1,4 @@
-/* App for PBR VITS flow - Full Upgrade */
+/* App for PBR VITS — Optimized Layout & Auto-Save */
 const UNI = "PBR VITS";
 const SUPPORT_NUMBER = "7075881419"; 
 
@@ -32,14 +32,6 @@ const EVENTS = {
 function $(s, r=document){ return r.querySelector(s); }
 function $all(s, r=document){ return Array.from(r.querySelectorAll(s)); }
 
-// Error shake logic
-function shake(id) {
-    const el = document.getElementById(id);
-    el.classList.add('error-shake');
-    setTimeout(() => el.classList.remove('error-shake'), 400);
-    beep(200, 0.2);
-}
-
 function hydrate(){
   const bSel = $("#branch");
   BRANCHES.forEach(b => bSel.innerHTML += `<option value="${b}">${b}</option>`);
@@ -50,17 +42,18 @@ function hydrate(){
   const list = $("#eventList");
   for(const cat in EVENTS){
     const section = document.createElement("div");
-    section.innerHTML = `<h3 style="margin-bottom:10px; color:var(--accent);">${cat}</h3>`;
+    section.innerHTML = `<h3 style="margin: 15px 0 10px 0; color:var(--accent); font-size:1rem;">${cat}</h3>`;
     EVENTS[cat].forEach(ev => {
-      const tagHtml = ev.tag ? `<span style="font-size:0.6rem; background:var(--accent); color:var(--bg); padding:2px 6px; border-radius:10px; margin-left:8px; vertical-align:middle;">${ev.tag}</span>` : '';
+      const tagHtml = ev.tag ? `<span style="font-size:0.55rem; background:var(--accent); color:var(--bg); padding:2px 5px; border-radius:4px; margin-left:5px; font-weight:bold;">${ev.tag}</span>` : '';
       const div = document.createElement("div");
       div.className = "glass";
-      div.style = "padding:12px; margin-bottom:10px; display:flex; align-items:center; gap:12px; cursor:pointer; border:1px solid var(--border); border-radius:12px;";
+      // Fixed: Made card height smaller and more compact
+      div.style = "padding:10px; margin-bottom:8px; display:flex; align-items:center; gap:10px; cursor:pointer; border:1px solid var(--border); border-radius:10px;";
       div.innerHTML = `
-        <input type="checkbox" id="${ev.id}" value="${ev.id}" data-name="${ev.name}" data-price="${ev.price}" data-emoji="${ev.emoji}" style="transform:scale(1.3)" />
-        <label for="${ev.id}" style="flex:1; cursor:pointer;">
+        <input type="checkbox" id="${ev.id}" value="${ev.id}" data-name="${ev.name}" data-price="${ev.price}" data-emoji="${ev.emoji}" style="width:18px; height:18px; cursor:pointer;" />
+        <label for="${ev.id}" style="flex:1; cursor:pointer; font-size:0.9rem;">
           <strong>${ev.emoji} ${ev.name}</strong> ${tagHtml}
-          <div style="font-size:0.85rem; color:var(--muted)">Price: ₹${ev.price}</div>
+          <div style="font-size:0.75rem; color:var(--muted)">Registration: ₹${ev.price}</div>
         </label>
       `;
       div.onclick = (e) => { if(e.target.tagName!=='INPUT') { const ck=$("#"+ev.id); ck.checked=!ck.checked; updateCart(); beep(600,0.05); } };
@@ -71,7 +64,7 @@ function hydrate(){
   
   $all("#eventList input").forEach(i => i.addEventListener("change", () => { updateCart(); beep(600,0.05); }));
 
-  // AUTO-SAVE logic
+  // Persistence logic
   ['name', 'roll', 'branch', 'year', 'gender'].forEach(id => {
     const el = document.getElementById(id);
     if(!el) return;
@@ -90,7 +83,7 @@ function getSelected(){
 
 function updateCart(){
   const {items, total} = getSelected();
-  $("#cartItems").innerHTML = items.length ? items.map(i => `<li>${i.emoji} ${i.name} — ₹${i.price}</li>`).join('') : "<li>No events selected yet.</li>";
+  $("#cartItems").innerHTML = items.length ? items.map(i => `<li>${i.emoji} ${i.name} — ₹${i.price}</li>`).join('') : "<li>None selected</li>";
   $("#cartTotal").textContent = "₹" + total;
   $("#proceedPay").disabled = items.length === 0;
 }
@@ -102,7 +95,7 @@ function setStep(idx){
   window.scrollTo({top:0, behavior:'smooth'});
 }
 
-async function showLoader(ms=800, emo="⏳"){
+async function showLoader(ms=600, emo="⏳"){
   const l = $("#loader");
   l.querySelector(".bubble").textContent = emo;
   l.classList.add("active");
@@ -113,14 +106,13 @@ function start(){
   hydrate(); setStep(0); updateCart();
 
   $("#next1").addEventListener("click", async ()=>{
-    if(!$("#name").value.trim()){ shake("name"); return; }
-    if(!$("#roll").value.trim()){ shake("roll"); return; }
-    beep(); await showLoader(700,"💜"); setStep(1);
+    if(!$("#name").value.trim() || !$("#roll").value.trim()){ alert("Enter name and roll"); return; }
+    beep(); await showLoader(500,"💜"); setStep(1);
   });
 
   $("#next2").addEventListener("click", async ()=>{
-    if(!$("#branch").value){ shake("branch"); return; }
-    beep(760,.07); await showLoader(700,"✨"); setStep(2);
+    if(!$("#branch").value){ alert("Select branch"); return; }
+    beep(760,.07); await showLoader(500,"✨"); setStep(2);
   });
 
   $("#proceedPay").addEventListener("click", async ()=>{
@@ -131,7 +123,7 @@ function start(){
       items, total, ts: new Date().toISOString()
     };
     localStorage.setItem("pendingPayment", JSON.stringify(payload));
-    beep(900, 0.1); await showLoader(1000, "💸");
+    beep(900, 0.1); await showLoader(800, "💸");
     window.location.href = "payment.html";
   });
 }
