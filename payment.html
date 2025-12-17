@@ -5,20 +5,50 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Payment — PBR VITS</title>
   <link rel="stylesheet" href="style.css" />
+  <style>
+    .copy-badge {
+      background: var(--accent);
+      color: var(--bg);
+      font-size: 0.7rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-left: 8px;
+      font-weight: bold;
+      vertical-align: middle;
+    }
+    .copy-badge:active { transform: scale(0.9); }
+  </style>
 </head>
 <body>
   <div class="container">
     <header class="glass card popIn">
       <h1>💳 Payment Instructions</h1>
-      <h2>Bank Transfer Details</h2>
+      <div class="glass" style="margin-top: 15px; padding: 15px; border: 1px solid var(--accent); border-radius: 16px; text-align: center;">
+        <span class="label" style="display: block; margin-bottom: 5px; font-size: 0.9rem;">Total Amount to Pay</span>
+        <h1 id="displayTotal" style="margin: 0; color: var(--good); font-size: 2.8rem; letter-spacing: -1px;">₹0</h1>
+        <button class="copy-badge" onclick="copyText(pending.total, 'Amount')">Copy Amount</button>
+      </div>
     </header>
 
     <section class="glass card popIn">
+      <h2>Bank Transfer Details</h2>
       <div class="grid grid-2">
-        <div><span class="label">Bank Transfer Account Number</span><div class="receipt"><strong>1234567890</strong></div></div>
-        <div><span class="label">Account Holder Name</span><div class="receipt"><strong>Tulluru Chetan</strong></div></div>
+        <div>
+          <span class="label">Bank Transfer Account Number</span>
+          <div class="receipt" style="display: flex; justify-content: space-between; align-items: center;">
+            <strong id="accNum">1234567890</strong>
+            <button class="copy-badge" onclick="copyText('1234567890', 'Account Number')">Copy</button>
+          </div>
+        </div>
+        <div>
+          <span class="label">Account Holder Name</span>
+          <div class="receipt"><strong>Tulluru Chetan</strong></div>
+        </div>
       </div>
-      <p class="footer-note">Transfer the total amount. Then enter your UTR below to confirm.</p>
+      
+      <p class="footer-note">1. Open your payment app (PhonePe/GPay/Paytm).<br>2. Transfer the <b>Total Amount</b> shown above.<br>3. Paste the <b>UTR / Transaction ID</b> below.</p>
+      
       <div class="grid grid-2">
         <div>
           <label class="label" for="utr">Enter UTR Number</label>
@@ -29,42 +59,70 @@
           <input id="note" placeholder="Any message for admin" />
         </div>
       </div>
-      <div style="margin-top:14px; display:flex; gap:10px;">
-        <button id="confirmPay" class="btn glow">Confirm & Download Receipt</button>
-        <a class="btn ghost" href="index.html">← Back</a>
+
+      <div style="margin-top:20px; display:flex; gap:10px; flex-direction: column;">
+        <button id="confirmPay" class="btn glow" style="width: 100%;">Confirm & Download Receipt</button>
+        <a href="index.html" class="btn ghost" style="text-align: center;">← Back to Cart</a>
       </div>
     </section>
   </div>
 
   <script>
-  function $(s, r=document){ return r.querySelector(s); }
-  function getRegs(){ return JSON.parse(localStorage.getItem("registrations")||"[]"); }
-  function setRegs(a){ localStorage.setItem("registrations", JSON.stringify(a)); }
-  function isDupUTR(utr){ return getRegs().some(r=> r.utr.toLowerCase()===utr.toLowerCase()); }
+    function $(s, r=document){ return r.querySelector(s); }
+    function getRegs(){ return JSON.parse(localStorage.getItem("registrations")||"[]"); }
+    function setRegs(a){ localStorage.setItem("registrations", JSON.stringify(a)); }
+    function isDupUTR(utr){ return getRegs().some(r=> r.utr.toLowerCase()===utr.toLowerCase()); }
 
-  const pending = JSON.parse(localStorage.getItem("pendingPayment")||"null");
-  if(!pending){
-    alert("No pending cart found. Please start from registration page.");
-    window.location.href = "index.html";
-  }
+    const pending = JSON.parse(localStorage.getItem("pendingPayment")||"null");
+    
+    if(!pending){
+      alert("No pending cart found. Please start from registration page.");
+      window.location.href = "index.html";
+    } else {
+      // Display the dynamic total from the cart
+      $("#displayTotal").textContent = "₹" + pending.total;
+    }
 
-  $("#confirmPay").addEventListener("click", ()=>{
-    const utr = $("#utr").value.trim();
-    if(!/^[A-Za-z0-9]{8,}$/.test(utr)){ alert("Enter a valid UTR (min 8 alphanumeric)"); return; }
-    if(isDupUTR(utr)){ alert("This UTR already exists. If you believe it's an error, contact support 7075881419."); return; }
+    function copyText(text, label) {
+      navigator.clipboard.writeText(text);
+      alert(label + " copied to clipboard!");
+    }
 
-    const reg = {
-      id: "REG-"+Date.now(),
-      name: pending.name, roll: pending.roll, gender: pending.gender, year: pending.year,
-      branch: pending.branch, events: pending.items.map(i=>i.id), items: pending.items, total: pending.total,
-      utr, note: $("#note").value.trim(), ts: new Date().toISOString()
-    };
-    const all = getRegs(); all.push(reg); setRegs(all);
-    localStorage.setItem("lastRegistrationId", reg.id);
-    // clear pending
-    localStorage.removeItem("pendingPayment");
-    window.location.href = "receipt.html";
-  });
+    $("#confirmPay").addEventListener("click", ()=>{
+      const utr = $("#utr").value.trim();
+      if(!/^[A-Za-z0-9]{8,}$/.test(utr)){ 
+        alert("Enter a valid UTR (min 8 alphanumeric characters)"); 
+        return; 
+      }
+      if(isDupUTR(utr)){ 
+        alert("This UTR has already been used. If this is an error, contact support 7075881419."); 
+        return; 
+      }
+
+      const reg = {
+        id: "REG-"+Date.now(),
+        name: pending.name, 
+        roll: pending.roll, 
+        gender: pending.gender, 
+        year: pending.year,
+        branch: pending.branch, 
+        events: pending.items.map(i=>i.id), 
+        items: pending.items, 
+        total: pending.total,
+        utr, 
+        note: $("#note").value.trim(), 
+        ts: new Date().toISOString()
+      };
+
+      const all = getRegs();
+      all.push(reg);
+      setRegs(all);
+
+      // Clear pending and go to receipt
+      localStorage.removeItem("pendingPayment");
+      localStorage.setItem("lastReg", JSON.stringify(reg));
+      window.location.href = "receipt.html";
+    });
   </script>
 </body>
 </html>
