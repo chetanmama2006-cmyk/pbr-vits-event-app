@@ -3,60 +3,57 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>PBR VITS — Registration</title>
+  <title>PBR VITS — Events</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div id="loader" class="loader"><div class="bubble">⏳</div></div>
-
   <div class="container">
-    <header class="glass card popIn" style="text-align:center;">
-      <h1>🎊 PBR VITS Events</h1>
-      <p style="color:var(--muted); margin:0;">Secure your spot for the ultimate tech & cultural fest.</p>
+    <header style="text-align:center; margin-bottom:30px;">
+      <h1 style="font-size:2rem; margin:0;">PBR VITS 2025</h1>
+      <p style="color:var(--muted)">Innovate • Create • Celebrate</p>
     </header>
 
-    <div class="step-container">
-      
+    <div class="main-grid">
       <main>
-        <section class="glass card popIn" data-step="0">
-          <span class="label">Step 1: Student Details</span>
-          <div class="grid grid-2">
-            <input id="name" placeholder="Full Name" />
-            <input id="roll" placeholder="Roll Number" />
-          </div>
-          <div class="grid grid-2">
+        <div class="glass active" data-step="0">
+          <h2 style="margin-top:0;">Student Details</h2>
+          <input id="name" placeholder="Enter Full Name" />
+          <input id="roll" placeholder="Roll Number (e.g. 21X...)" />
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
             <select id="gender"><option value="Male">Male</option><option value="Female">Female</option></select>
             <select id="year"></select>
           </div>
-          <button id="next1" class="btn glow" style="width:100%;">Continue →</button>
-        </section>
+          <button id="next1" class="btn">Next Step</button>
+        </div>
 
-        <section class="glass card popIn" data-step="1" style="display:none;">
-          <span class="label">Step 2: Department</span>
-          <select id="branch"><option value="">Select Branch</option></select>
-          <div class="grid grid-2">
-            <button id="next2" class="btn glow">Next Step</button>
-            <button onclick="location.reload()" class="btn ghost">Reset</button>
-          </div>
-        </section>
+        <div class="glass" data-step="1">
+          <div class="back-link" onclick="setStep(0)">← Edit Personal Details</div>
+          <h2>Department</h2>
+          <select id="branch"><option value="">Select your Branch</option></select>
+          <button id="next2" class="btn">View Events</button>
+        </div>
 
-        <section class="glass card popIn" data-step="2" style="display:none;">
-          <span class="label">Step 3: Select Events</span>
+        <div class="glass" data-step="2">
+          <div class="back-link" onclick="setStep(1)">← Change Department</div>
+          <h2>Select Events</h2>
           <div id="eventList"></div>
-        </section>
+        </div>
       </main>
 
-      <aside class="glass card cart popIn" id="cartSection">
-        <h3 style="margin-bottom:15px; display:flex; align-items:center; gap:8px;">🛒 Registration Cart</h3>
-        <ul id="cartItems" style="padding:0; margin:0; list-style:none;"></ul>
-        <hr style="border:0; border-top:1px solid var(--border); margin:15px 0;">
-        <div style="display:flex; justify-content:space-between; font-size:1.2rem; font-weight:bold;">
-          <span>Total</span>
-          <span id="cartTotal" style="color:var(--good);">₹0</span>
+      <aside>
+        <div class="glass cart-panel" id="cart">
+          <h3 style="margin-top:0;">🛒 Your Selection</h3>
+          <div id="cartItems" style="min-height:50px; color:var(--muted); font-size:0.9rem;">
+            No events selected yet...
+          </div>
+          <hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">
+          <div style="display:flex; justify-content:space-between; font-size:1.3rem; font-weight:bold;">
+            <span>Total:</span>
+            <span id="cartTotal" style="color:var(--good);">₹0</span>
+          </div>
+          <button id="proceedPay" class="btn" style="margin-top:20px;" disabled>Proceed to Payment</button>
         </div>
-        <button id="proceedPay" class="btn glow" style="width:100%; margin-top:15px;" disabled>Proceed to Pay</button>
       </aside>
-
     </div>
   </div>
   <script src="app.js"></script>

@@ -1,73 +1,76 @@
-/* App for PBR VITS — PC Optimized */
 const BRANCHES = ["AIML","AI","CSE","ECE","EEE","MECH","CIVIL"];
 const YEARS = ["1st Year","2nd Year","3rd Year","4th Year"];
 const EVENTS = {
-  Technical: [{id:"hack",name:"Hackathon",emoji:"💻",price:300},{id:"robo",name:"Robo Race",emoji:"🤖",price:250},{id:"quiz",name:"Tech Quiz",emoji:"❓",price:150}],
-  Cultural: [{id:"dance",name:"Group Dance",emoji:"💃",price:200},{id:"sing",name:"Solo Singing",emoji:"🎤",price:120},{id:"art",name:"Art Jam",emoji:"🎨",price:150}]
+  Technical: [{id:"hack",name:"Hackathon",emoji:"💻",price:300},{id:"robo",name:"Robo Race",emoji:"🤖",price:250}],
+  Cultural: [{id:"dance",name:"Group Dance",emoji:"💃",price:200},{id:"sing",name:"Solo Singing",emoji:"🎤",price:120}]
 };
 
 function $(s){ return document.querySelector(s); }
-function $all(s){ return Array.from(document.querySelectorAll(s)); }
 
 function hydrate(){
   BRANCHES.forEach(b => $("#branch").innerHTML += `<option value="${b}">${b}</option>`);
   YEARS.forEach(y => $("#year").innerHTML += `<option value="${y}">${y}</option>`);
 
   for(const cat in EVENTS){
-    const sec = document.createElement("div");
-    sec.innerHTML = `<h3 style="margin:15px 0 10px 0; color:var(--accent); font-size:1rem;">${cat}</h3>`;
+    const h = document.createElement("h4");
+    h.textContent = cat; h.style.color = "var(--accent)";
+    $("#eventList").appendChild(h);
+
     EVENTS[cat].forEach(ev => {
-      const card = document.createElement("div");
-      card.className = "glass";
-      card.style = "padding:12px; margin-bottom:8px; display:flex; align-items:center; gap:12px; cursor:pointer; border:1px solid var(--border); border-radius:12px;";
-      card.innerHTML = `<input type="checkbox" id="${ev.id}" data-name="${ev.name}" data-price="${ev.price}" style="pointer-events:none; width:18px; height:18px;">
-                        <div style="flex:1"><strong>${ev.emoji} ${ev.name}</strong><br><small style="color:var(--muted)">₹${ev.price}</small></div>`;
-      card.onclick = () => {
-        const ck = card.querySelector('input');
+      const row = document.createElement("div");
+      row.className = "event-row";
+      row.innerHTML = `
+        <div style="font-size:1.5rem">${ev.emoji}</div>
+        <div style="flex:1"><strong>${ev.name}</strong><br><small style="color:var(--muted)">₹${ev.price}</small></div>
+        <input type="checkbox" id="ck-${ev.id}" style="width:20px; height:20px; accent-color:var(--accent);">
+      `;
+      row.onclick = () => {
+        const ck = row.querySelector('input');
         ck.checked = !ck.checked;
-        card.style.borderColor = ck.checked ? "var(--accent)" : "var(--border)";
+        row.classList.toggle('selected', ck.checked);
         
-        // Cart Glow Animation
-        const cart = $("#cartSection");
-        cart.classList.remove("cart-bump");
-        void cart.offsetWidth;
-        cart.classList.add("cart-bump");
+        // POP ANIMATION
+        $("#cart").classList.remove("cart-bump");
+        void $("#cart").offsetWidth;
+        $("#cart").classList.add("cart-bump");
         
         updateCart();
       };
-      sec.appendChild(card);
+      $("#eventList").appendChild(row);
     });
-    $("#eventList").appendChild(sec);
   }
 }
 
 function updateCart(){
-  const selected = $all("#eventList input:checked").map(i => ({name: i.dataset.name, price: parseInt(i.dataset.price)}));
-  $("#cartItems").innerHTML = selected.length ? selected.map(s => `<li style="margin-bottom:5px;">✅ ${s.name}</li>`).join('') : "<li style='color:var(--muted)'>No events selected</li>";
-  const total = selected.reduce((a,b) => a + b.price, 0);
+  const checked = Array.from(document.querySelectorAll('#eventList input:checked'));
+  const total = checked.reduce((sum, input) => {
+    const id = input.id.replace('ck-','');
+    const ev = Object.values(EVENTS).flat().find(e => e.id === id);
+    return sum + ev.price;
+  }, 0);
+
+  $("#cartItems").innerHTML = checked.length ? 
+    checked.map(c => `• ${Object.values(EVENTS).flat().find(e=>e.id===c.id.replace('ck-','')).name}`).join('<br>') : 
+    "No events selected yet...";
+    
   $("#cartTotal").textContent = "₹" + total;
-  $("#proceedPay").disabled = selected.length === 0;
+  $("#proceedPay").disabled = checked.length === 0;
 }
 
 function setStep(idx){
-  $all("[data-step]").forEach((s, i) => s.style.display = i == idx ? "block" : "none");
-}
-
-async function showLoader(){
-  $("#loader").classList.add("active");
-  await new Promise(r => setTimeout(r, 600));
-  $("#loader").classList.remove("active");
+  document.querySelectorAll('[data-step]').forEach((el, i) => {
+    el.classList.toggle('active', i === idx);
+  });
 }
 
 window.onload = () => {
   hydrate();
-  $("#next1").onclick = async () => { if($("#name").value && $("#roll").value) { await showLoader(); setStep(1); } else alert("Fill details"); };
-  $("#next2").onclick = async () => { if($("#branch").value) { await showLoader(); setStep(2); } else alert("Select branch"); };
+  $("#next1").onclick = () => { if($("#name").value && $("#roll").value) setStep(1); else alert("Please enter name and roll"); };
+  $("#next2").onclick = () => { if($("#branch").value) setStep(2); else alert("Please select branch"); };
   $("#proceedPay").onclick = () => {
-    const items = $all("#eventList input:checked").map(i => ({name: i.dataset.name, price: i.dataset.price}));
+    const total = $("#cartTotal").textContent.replace("₹","");
     localStorage.setItem("pendingPayment", JSON.stringify({
-      name: $("#name").value, roll: $("#roll").value, branch: $("#branch").value,
-      year: $("#year").value, total: $("#cartTotal").textContent.replace("₹",""), items
+      name: $("#name").value, roll: $("#roll").value, branch: $("#branch").value, total
     }));
     window.location.href = "payment.html";
   };

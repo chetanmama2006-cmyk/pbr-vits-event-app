@@ -1,138 +1,95 @@
-/* PBR VITS — PC & Mobile Optimized Layout */
 :root {
   --bg: #0b0716;
-  --glass: rgba(255, 255, 255, 0.08);
-  --border: rgba(255, 255, 255, 0.15);
+  --glass: rgba(255, 255, 255, 0.06);
+  --border: rgba(255, 255, 255, 0.12);
   --accent: #b07bff;
   --accent-2: #e2b3ff;
   --text: #fbf8ff;
   --muted: #a496c7;
   --good: #43d17a;
-  --bad: #ff6b6b;
-  --shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 0 0 15px rgba(176, 123, 255, 0.2);
+  --shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
 body {
-  margin: 0;
-  padding: 0;
-  color: var(--text);
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  margin: 0; padding: 0; color: var(--text);
+  font-family: 'Inter', system-ui, sans-serif;
   background: var(--bg);
-  background-attachment: fixed;
-  background-image: 
-    radial-gradient(circle at 10% 20%, rgba(176, 123, 255, 0.12), transparent 40%),
-    radial-gradient(circle at 90% 80%, rgba(226, 179, 255, 0.08), transparent 40%);
-  line-height: 1.6;
+  background-image: radial-gradient(circle at 0% 0%, #1a0b2e 0%, transparent 50%), radial-gradient(circle at 100% 100%, #130722 0%, transparent 50%);
+  min-height: 100vh; overflow-x: hidden;
 }
 
-/* PC Optimization: Center the container and limit width */
-.container {
-  max-width: 1000px; /* Wider for PC split view */
-  margin: 0 auto;
-  padding: 20px;
-  min-height: 100vh;
-}
+.container { max-width: 1100px; margin: 0 auto; padding: 20px; }
 
-/* Logic for Split Screen on PC */
-.step-container {
+/* PC Layout Grid */
+.main-grid {
   display: grid;
-  grid-template-columns: 1fr; /* Default Mobile: 1 column */
-  gap: 20px;
-  align-items: start;
+  grid-template-columns: 1fr;
+  gap: 30px;
+  margin-top: 20px;
 }
+@media (min-width: 900px) { .main-grid { grid-template-columns: 1.6fr 1fr; } }
 
-@media (min-width: 850px) {
-  .step-container {
-    grid-template-columns: 1.5fr 1fr; /* PC: Form on left, Cart on right */
-  }
-}
-
-/* Glassmorphism Design */
 .glass {
   background: var(--glass);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--border);
-  border-radius: 20px;
-}
-
-.card {
+  border-radius: 24px;
   padding: 24px;
-  margin-bottom: 20px;
   box-shadow: var(--shadow);
 }
 
-/* Cart Styling - On PC it looks like a sidebar */
-.cart {
-  position: sticky;
-  top: 20px;
-  border: 1px solid var(--accent);
-  transition: all 0.3s ease;
+/* Back Button Styling */
+.back-link {
+  color: var(--muted); cursor: pointer; display: inline-flex; align-items: center;
+  gap: 5px; font-size: 0.9rem; margin-bottom: 15px; transition: 0.3s;
+}
+.back-link:hover { color: var(--accent); transform: translateX(-5px); }
+
+/* Compact Event Cards */
+.event-row {
+  display: flex; align-items: center; gap: 15px; padding: 12px;
+  margin-bottom: 10px; border-radius: 16px; border: 1px solid var(--border);
+  cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.event-row:hover { background: rgba(255,255,255,0.03); border-color: var(--accent); }
+.event-row.selected { background: rgba(176, 123, 255, 0.1); border-color: var(--accent); }
+
+/* Floating Cart Pop Animation */
+.cart-panel {
+  position: sticky; top: 20px;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.cart-bump { animation: pop 0.4s ease; }
+
+@keyframes pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); border-color: var(--accent); }
+  100% { transform: scale(1); }
 }
 
-.cart-bump {
-  animation: bump 0.4s ease-out;
-  box-shadow: 0 0 20px rgba(176, 123, 255, 0.4);
-}
-
-@keyframes bump {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.02); }
-}
-
-/* Professional Input Fields */
+/* Modern Inputs */
 input, select {
-  width: 100%;
-  padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  color: #fff;
-  font-size: 1rem;
-  margin-bottom: 15px;
+  width: 100%; padding: 14px; background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border); border-radius: 14px; color: white;
+  margin-bottom: 15px; outline: none; transition: 0.3s;
 }
+input:focus { border-color: var(--accent); background: rgba(255,255,255,0.08); }
 
-input:focus { outline:none; border-color: var(--accent); }
-
-/* Buttons */
 .btn {
-  padding: 14px 24px;
-  border-radius: 12px;
-  border: none;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.2s;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1rem;
-}
-
-.btn.glow {
+  width: 100%; padding: 16px; border-radius: 14px; border: none;
+  font-weight: 700; cursor: pointer; transition: 0.3s;
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  color: var(--bg);
+  color: #000; font-size: 1rem;
 }
+.btn:disabled { opacity: 0.3; filter: grayscale(1); }
+.btn:active { transform: scale(0.96); }
 
-.btn.ghost { background: transparent; border: 1px solid var(--border); color: var(--text); }
+/* Navigation Steps Visibility */
+[data-step] { display: none; }
+[data-step].active { display: block; animation: slideUp 0.5s ease; }
 
-.btn:hover { transform: translateY(-2px); opacity: 0.9; }
-
-/* Grid for forms */
-.grid { display: grid; gap: 15px; }
-.grid-2 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
-
-/* Animations */
-.popIn { animation: popIn 0.5s ease-out; }
-@keyframes popIn {
-  from { opacity: 0; transform: translateY(10px); }
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
-
-/* Loader */
-.loader {
-  position: fixed; inset: 0; background: var(--bg); 
-  z-index: 9999; display: none; align-items: center; justify-content: center;
-}
-.loader.active { display: flex; }
