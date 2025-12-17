@@ -6,14 +6,14 @@
   <title>Payment — PBR VITS</title>
   <link rel="stylesheet" href="style.css" />
   <style>
-    .timer-box { background: rgba(255, 107, 107, 0.1); border: 1px solid var(--bad); padding: 8px; border-radius: 12px; margin-bottom: 15px; text-align: center; color: var(--bad); font-weight: bold; }
+    .timer-box { background: rgba(176,123,255,0.1); border: 1px solid var(--accent); padding: 8px; border-radius: 12px; margin-bottom: 15px; text-align: center; color: var(--accent); font-weight: bold; }
   </style>
 </head>
 <body>
   <div class="container">
     <header class="glass card popIn">
       <h1>💳 Payment</h1>
-      <div class="timer-box">⏳ Time Left: <span id="timer">05:00</span></div>
+      <div class="timer-box">🕒 Time Left: <span id="timer">05:00</span></div>
       <div class="glass" style="padding:15px; border:1px solid var(--accent); border-radius:16px; text-align:center;">
         <span class="label">Amount Due</span>
         <h1 id="displayTotal" style="margin:0; color:var(--good); font-size:2.8rem;">₹0</h1>
@@ -35,11 +35,13 @@
   <script>
     const pending = JSON.parse(localStorage.getItem("pendingPayment")||"null");
     if(!pending) window.location.href="index.html";
-    const amt = pending.total;
-    document.getElementById("displayTotal").textContent = "₹" + amt;
+    
+    // STRICT FIX FOR AMOUNT
+    const finalAmount = pending.total; 
+    document.getElementById("displayTotal").textContent = "₹" + finalAmount;
 
     document.getElementById("upiBtn").onclick = () => {
-      window.location.href = `upi://pay?pa=7075881419@ybl&pn=Tulluru%20Chetan&am=${amt}&cu=INR&tn=PBRVITS_${pending.roll}`;
+      window.location.href = `upi://pay?pa=7075881419@ybl&pn=Tulluru%20Chetan&am=${finalAmount}&cu=INR&tn=PBRVITS_${pending.roll}`;
     };
 
     let time = 300;
@@ -52,7 +54,12 @@
     document.getElementById("confirmPay").onclick = () => {
       const u = document.getElementById("utr").value.trim();
       if(u.length < 8) return alert("Invalid UTR");
-      const reg = { id:"REG-"+Date.now(), ...pending, utr:u, ts:new Date().toISOString() };
+      
+      // NEW REG ID FORMAT
+      const rand = Math.floor(1000 + Math.random() * 9000);
+      const regId = `PBR-2025-${rand}`;
+
+      const reg = { id: regId, ...pending, utr:u, ts:new Date().toISOString() };
       const all = JSON.parse(localStorage.getItem("registrations")||"[]");
       all.push(reg);
       localStorage.setItem("registrations", JSON.stringify(all));
