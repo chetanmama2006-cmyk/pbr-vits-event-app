@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Ticket — PBR VITS</title>
+  <title>Receipt — PBR VITS</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <style>
     .ticket { border: 2px solid var(--accent); border-radius: 20px; background: var(--glass); overflow: hidden; margin-top: 20px; box-shadow: var(--shadow); }
-    .ticket-h { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: var(--bg); padding: 12px; text-align: center; font-weight: bold; letter-spacing: 2px; }
+    .ticket-h { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: var(--bg); padding: 12px; text-align: center; font-weight: bold; }
     .ticket-b { padding: 20px; }
     .cut { border-top: 2px dashed var(--border); margin: 15px 0; position: relative; }
     .cut::before, .cut::after { content: ''; position: absolute; width: 20px; height: 20px; background: var(--bg); border-radius: 50%; top: -11px; }
@@ -17,56 +17,45 @@
 </head>
 <body>
   <div class="container">
-    <header class="glass card popIn"><h1>🎉 Registration Confirmed!</h1></header>
+    <header class="glass card popIn"><h1>🎉 Success!</h1></header>
     <div class="ticket popIn">
         <div class="ticket-h">OFFICIAL EVENT PASS</div>
         <div class="ticket-b" id="out"></div>
     </div>
     <div class="glass card popIn" style="display:flex; gap:10px; margin-top:15px; flex-direction:column;">
       <button class="btn glow" onclick="window.print()">🖨️ Print Ticket</button>
-      <button class="btn ghost" id="shareAdmin" style="background: #25D366; color: white; border: none;">💬 Send Details to Admin</button>
-      <a class="btn ghost" href="index.html" style="text-align:center;">Register Another Student</a>
+      <button class="btn ghost" id="shareAdmin" style="background:#25D366; color:white; border:none;">💬 Send All Details to Admin</button>
+      <a class="btn ghost" href="index.html" style="text-align:center;">Register Another</a>
     </div>
   </div>
   <script>
     const last = JSON.parse(localStorage.getItem("lastReg")||"null");
     if(!last) window.location.href="index.html";
-    
-    window.onload = () => confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#b07bff', '#ffffff'] });
+    window.onload = () => confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
 
-    const eventNames = last.items.map(i => i.name).join(", ");
-    
     document.getElementById("out").innerHTML = `
       <div style="display:flex; justify-content:space-between;">
-        <div><span class="label">STUDENT</span><div style="font-size:1.2rem; font-weight:bold;">${last.name}</div></div>
-        <div style="text-align:right;"><span class="label">REG ID</span><div>${last.id}</div></div>
+        <div><span class="label">STUDENT</span><div style="font-weight:bold;">${last.name}</div></div>
+        <div style="text-align:right;"><span class="label">ID</span><div>${last.id}</div></div>
       </div>
-      <div style="margin-top:10px;"><span class="label">ROLL & BRANCH</span><div>${last.roll} (${last.branch})</div></div>
+      <div style="margin-top:8px;"><span class="label">ROLL</span><div>${last.roll} (${last.branch})</div></div>
       <div class="cut"></div>
-      <span class="label">REGISTERED EVENTS</span>
+      <span class="label">EVENTS</span>
       <ul style="list-style:none; padding:0; margin:5px 0;">${last.items.map(i=>`<li>${i.emoji} ${i.name}</li>`).join('')}</ul>
       <div class="cut"></div>
       <div style="display:flex; justify-content:space-between; align-items:center;">
-        <div><span class="label">UTR NO.</span><div style="font-size:0.8rem; font-family:monospace;">${last.utr}</div></div>
-        <div style="text-align:right;"><span class="label">TOTAL PAID</span><div style="font-size:1.5rem; color:var(--good); font-weight:bold;">₹${last.total}</div></div>
+        <div><span class="label">UTR</span><div style="font-size:0.75rem;">${last.utr}</div></div>
+        <div style="text-align:right;"><span class="label">PAID</span><div style="font-size:1.4rem; color:var(--good); font-weight:bold;">₹${last.total}</div></div>
       </div>
     `;
 
     document.getElementById("shareAdmin").onclick = () => {
-      // PREPARING FULL DETAILS MESSAGE
-      const fullMessage = `*PBR VITS REGISTRATION*%0A` +
-                          `--------------------------%0A` +
-                          `*Name:* ${last.name}%0A` +
-                          `*Roll:* ${last.roll}%0A` +
-                          `*Branch:* ${last.branch}%0A` +
-                          `*Events:* ${eventNames}%0A` +
-                          `*Total:* ₹${last.total}%0A` +
-                          `*UTR:* ${last.utr}%0A` +
-                          `*Reg ID:* ${last.id}%0A` +
-                          `--------------------------%0A` +
-                          `Please verify my payment.`;
-      
-      window.open(`https://wa.me/7075881419?text=${fullMessage}`);
+      const msg = `*PBR VITS REGISTRATION*%0A` +
+                  `*Name:* ${last.name}%0A*Roll:* ${last.roll}%0A*Branch:* ${last.branch}%0A` +
+                  `*Events:* ${last.items.map(i=>i.name).join(", ")}%0A` +
+                  `*Total:* ₹${last.total}%0A*UTR:* ${last.utr}%0A*ID:* ${last.id}%0A` +
+                  `Please verify my spot!`;
+      window.open(`https://wa.me/7075881419?text=${msg}`);
     };
   </script>
 </body>

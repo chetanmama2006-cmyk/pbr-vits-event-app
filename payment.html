@@ -6,52 +6,47 @@
   <title>Payment — PBR VITS</title>
   <link rel="stylesheet" href="style.css" />
   <style>
-    .copy-badge { background: var(--accent); color: var(--bg); font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; cursor: pointer; margin-left: 8px; font-weight: bold; }
-    .timer-box { background: rgba(255, 107, 107, 0.15); border: 1px solid var(--bad); padding: 8px; border-radius: 12px; margin-bottom: 15px; text-align: center; color: var(--bad); font-weight: bold; }
+    .timer-box { background: rgba(255, 107, 107, 0.1); border: 1px solid var(--bad); padding: 8px; border-radius: 12px; margin-bottom: 15px; text-align: center; color: var(--bad); font-weight: bold; }
   </style>
 </head>
 <body>
   <div class="container">
     <header class="glass card popIn">
       <h1>💳 Payment</h1>
-      <div class="timer-box">⏳ Session Expires: <span id="timer">05:00</span></div>
+      <div class="timer-box">⏳ Time Left: <span id="timer">05:00</span></div>
       <div class="glass" style="padding:15px; border:1px solid var(--accent); border-radius:16px; text-align:center;">
-        <span class="label">Total Amount</span>
+        <span class="label">Amount Due</span>
         <h1 id="displayTotal" style="margin:0; color:var(--good); font-size:2.8rem;">₹0</h1>
       </div>
     </header>
-
     <section class="glass card popIn">
-      <button id="upiBtn" class="btn glow" style="width:100%; background:linear-gradient(135deg, #673ab7, #9c27b0); margin-bottom:20px;">🚀 Open UPI App (GPay/PhonePe)</button>
+      <button id="upiBtn" class="btn glow" style="width:100%; background:linear-gradient(135deg, #673ab7, #9c27b0); margin-bottom:15px;">🚀 Open GPay / PhonePe</button>
       <div class="grid grid-2">
-        <div><span class="label">UPI ID</span><div class="receipt"><strong>7075881419@ybl</strong></div></div>
-        <div><span class="label">Holder</span><div class="receipt"><strong>T. Chetan</strong></div></div>
+        <div><span class="label">UPI ID</span><div class="receipt">7075881419@ybl</div></div>
+        <div><span class="label">Holder</span><div class="receipt">T. Chetan</div></div>
       </div>
-      <div class="grid grid-2" style="margin-top:20px;">
-        <input id="utr" placeholder="12-digit UTR Number" />
-        <input id="note" placeholder="Note (Optional)" />
+      <div class="grid grid-2" style="margin-top:15px;">
+        <input id="utr" placeholder="12-digit UTR" />
+        <input id="note" placeholder="Your Name" />
       </div>
       <button id="confirmPay" class="btn glow" style="width:100%; margin-top:15px;">Confirm Payment</button>
-      <a href="index.html" class="btn ghost" style="width:100%; text-align:center; margin-top:10px;">← Cancel</a>
     </section>
   </div>
-
   <script>
     const pending = JSON.parse(localStorage.getItem("pendingPayment")||"null");
     if(!pending) window.location.href="index.html";
-    
     const amt = pending.total;
     document.getElementById("displayTotal").textContent = "₹" + amt;
 
     document.getElementById("upiBtn").onclick = () => {
-      window.location.href = `upi://pay?pa=7075881419@ybl&pn=Tulluru%20Chetan&am=${amt}&cu=INR&tn=PBR%20VITS%20${pending.roll}`;
+      window.location.href = `upi://pay?pa=7075881419@ybl&pn=Tulluru%20Chetan&am=${amt}&cu=INR&tn=PBRVITS_${pending.roll}`;
     };
 
     let time = 300;
     const itv = setInterval(() => {
       let m = Math.floor(time/60), s = time%60;
       document.getElementById("timer").textContent = `${m}:${s<10?'0':''}${s}`;
-      if(time-- <= 0){ clearInterval(itv); alert("Expired"); window.location.href="index.html"; }
+      if(time-- <= 0){ clearInterval(itv); window.location.href="index.html"; }
     }, 1000);
 
     document.getElementById("confirmPay").onclick = () => {
