@@ -1,4 +1,4 @@
-/* PBR VITS — Purple Party Theme — FULL SYSTEM */
+/* PBR VITS — PC & Mobile Optimized Layout */
 :root {
   --bg: #0b0716;
   --glass: rgba(255, 255, 255, 0.08);
@@ -21,24 +21,39 @@ body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   background: var(--bg);
   background-attachment: fixed;
-  /* Deep purple ambient glow */
   background-image: 
-    radial-gradient(circle at 10% 20%, rgba(176, 123, 255, 0.15), transparent 40%),
-    radial-gradient(circle at 90% 80%, rgba(226, 179, 255, 0.1), transparent 40%);
+    radial-gradient(circle at 10% 20%, rgba(176, 123, 255, 0.12), transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(226, 179, 255, 0.08), transparent 40%);
   line-height: 1.6;
 }
 
+/* PC Optimization: Center the container and limit width */
 .container {
-  max-width: 500px;
+  max-width: 1000px; /* Wider for PC split view */
   margin: 0 auto;
   padding: 20px;
+  min-height: 100vh;
 }
 
-/* Glassmorphism Cards */
+/* Logic for Split Screen on PC */
+.step-container {
+  display: grid;
+  grid-template-columns: 1fr; /* Default Mobile: 1 column */
+  gap: 20px;
+  align-items: start;
+}
+
+@media (min-width: 850px) {
+  .step-container {
+    grid-template-columns: 1.5fr 1fr; /* PC: Form on left, Cart on right */
+  }
+}
+
+/* Glassmorphism Design */
 .glass {
   background: var(--glass);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
   border: 1px solid var(--border);
   border-radius: 20px;
 }
@@ -49,22 +64,25 @@ body {
   box-shadow: var(--shadow);
 }
 
-/* Typography */
-h1, h2, h3 { margin: 0; font-weight: 700; }
-h1 { font-size: 1.5rem; color: var(--accent); margin-bottom: 4px; }
-h2 { font-size: 0.9rem; color: var(--muted); margin-bottom: 15px; font-weight: 400; }
-
-.label {
-  display: block;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--accent);
-  margin-bottom: 6px;
-  font-weight: 600;
+/* Cart Styling - On PC it looks like a sidebar */
+.cart {
+  position: sticky;
+  top: 20px;
+  border: 1px solid var(--accent);
+  transition: all 0.3s ease;
 }
 
-/* Form Elements */
+.cart-bump {
+  animation: bump 0.4s ease-out;
+  box-shadow: 0 0 20px rgba(176, 123, 255, 0.4);
+}
+
+@keyframes bump {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+/* Professional Input Fields */
 input, select {
   width: 100%;
   padding: 12px 16px;
@@ -74,14 +92,9 @@ input, select {
   color: #fff;
   font-size: 1rem;
   margin-bottom: 15px;
-  transition: 0.3s;
 }
 
-input:focus, select:focus {
-  outline: none;
-  border-color: var(--accent);
-  background: rgba(255, 255, 255, 0.1);
-}
+input:focus { outline:none; border-color: var(--accent); }
 
 /* Buttons */
 .btn {
@@ -90,137 +103,36 @@ input:focus, select:focus {
   border: none;
   font-weight: 600;
   cursor: pointer;
-  transition: 0.3s;
+  transition: 0.2s;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  font-size: 0.95rem;
+  font-size: 1rem;
 }
 
 .btn.glow {
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
   color: var(--bg);
-  box-shadow: 0 8px 20px rgba(176, 123, 255, 0.3);
 }
 
-.btn.glow:active { transform: scale(0.97); }
+.btn.ghost { background: transparent; border: 1px solid var(--border); color: var(--text); }
 
-.btn.ghost {
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text);
-}
+.btn:hover { transform: translateY(-2px); opacity: 0.9; }
 
-.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+/* Grid for forms */
+.grid { display: grid; gap: 15px; }
+.grid-2 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
 
-/* Stepper Navigation */
-.stepper {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 15px;
-  position: relative;
-}
-
-.step {
-  font-size: 0.7rem;
-  color: var(--muted);
-  text-align: center;
-  flex: 1;
-}
-
-.step.active { color: var(--accent); font-weight: bold; }
-
-/* Event Cards (The Rows) */
-.event-card {
-  transition: transform 0.2s, background 0.2s;
-}
-
-.event-card:active { transform: scale(0.98); }
-
-/* Cart Styling & Animation */
-.cart {
-  border: 1.5px solid var(--border);
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.cart-bump {
-  animation: bump 0.4s ease-out;
-  border: 2px solid var(--accent) !important;
-  box-shadow: 0 0 25px rgba(176, 123, 255, 0.4);
-  background: rgba(176, 123, 255, 0.05);
-}
-
-@keyframes bump {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.03); }
-  100% { transform: scale(1); }
-}
-
-/* Success Ticket Styles */
-.ticket {
-  border: 2px solid var(--accent);
-  background: rgba(255,255,255,0.03);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-}
-
-.ticket-h {
-  background: linear-gradient(90deg, var(--accent), var(--accent-2));
-  color: var(--bg);
-  padding: 10px;
-  text-align: center;
-  font-weight: 800;
-  letter-spacing: 2px;
-  font-size: 0.8rem;
-}
-
-.cut {
-  border-top: 2px dashed var(--border);
-  margin: 15px -20px;
-  position: relative;
-}
-
-/* Utility */
-.pulse { animation: pulseAnim 2s infinite; }
-@keyframes pulseAnim {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
-}
-
-.popIn {
-  animation: popIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
+/* Animations */
+.popIn { animation: popIn 0.5s ease-out; }
 @keyframes popIn {
-  from { opacity: 0; transform: translateY(10px) scale(0.95); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* Loader */
 .loader {
-  position: fixed;
-  inset: 0;
-  background: var(--bg);
-  z-index: 9999;
-  display: none;
-  align-items: center;
-  justify-content: center;
+  position: fixed; inset: 0; background: var(--bg); 
+  z-index: 9999; display: none; align-items: center; justify-content: center;
 }
 .loader.active { display: flex; }
-.loader .bubble {
-  font-size: 3rem;
-  animation: bounce 0.6s infinite alternate;
-}
-
-@keyframes bounce {
-  from { transform: translateY(0); }
-  to { transform: translateY(-20px); }
-}
-
-/* Responsive Grid */
-.grid { display: grid; gap: 15px; }
-.grid-2 { grid-template-columns: 1fr 1fr; }
-
-@media (max-width: 400px) {
-  .grid-2 { grid-template-columns: 1fr; }
-}

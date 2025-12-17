@@ -3,92 +3,62 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>PBR VITS — Event Registration</title>
+  <title>PBR VITS — Registration</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div id="loader" class="loader">
-    <div class="bubble">⏳</div>
-  </div>
+  <div id="loader" class="loader"><div class="bubble">⏳</div></div>
 
   <div class="container">
-    <header class="banner glass card popIn">
-      <h1>🎊 PBR VITS — Registration Events</h1>
-      <h2 class="pulse">“Dream it. Build it. Rock the stage.”</h2>
-      <p class="quote">Welcome to the Purple Party! Glide through the steps to register, select events, and secure your spot.</p>
-      <div class="stepper">
-        <div class="step active"><div class="dot"></div> 1) Student</div>
-        <div class="step"><div class="dot"></div> 2) Branch</div>
-        <div class="step"><div class="dot"></div> 3) Events & Cart</div>
-      </div>
+    <header class="glass card popIn" style="text-align:center;">
+      <h1>🎊 PBR VITS Events</h1>
+      <p style="color:var(--muted); margin:0;">Secure your spot for the ultimate tech & cultural fest.</p>
     </header>
 
-    <!-- Step 0: Login / student details -->
-    <section class="glass card popIn" data-step="0">
-      <div class="grid grid-2">
-        <div>
-          <label class="label" for="name">Full Name</label>
-          <input id="name" placeholder="e.g., Rahul / Priya" />
-        </div>
-        <div>
-          <label class="label" for="roll">Roll Number</label>
-          <input id="roll" placeholder="e.g., 22AI1234" />
-        </div>
-        <div>
-          <label class="label" for="gender">Gender</label>
-          <select id="gender">
-            <option value="">— Select —</option>
-            <option>Male</option>
-            <option>Female</option>
-            <option>Other</option>
-            <option>Prefer not to say</option>
-          </select>
-        </div>
-        <div>
-          <label class="label" for="year">Year</label>
-          <select id="year">
-            <option value="">— Select Year —</option>
-          </select>
-        </div>
-      </div>
-      <div style="margin-top:14px; display:flex; gap:10px;">
-        <button id="next1" class="btn glow">Next →</button>
-        <a class="btn ghost" href="admin.html">Admin</a>
-      </div>
-    </section>
-
-    <!-- Step 1: Branch -->
-    <section class="glass card popIn" data-step="1" style="display:none;">
-      <div class="grid">
-        <div>
-          <label class="label" for="branch">Select Branch</label>
-          <select id="branch"><option value="">— Choose branch —</option></select>
-        </div>
-        <p class="footer-note">Tip: Your branch helps with pools, prizes, and scheduling.</p>
-      </div>
-      <div style="margin-top:14px; display:flex; gap:10px;">
-        <button id="next2" class="btn glow">Next →</button>
-        <button onclick="history.back()" class="btn ghost">Back</button>
-      </div>
-    </section>
-
-    <!-- Step 2: Events + Cart -->
-    <section class="glass card popIn" data-step="2" style="display:none;">
-      <div class="grid grid-2">
-        <div id="eventList" class="grid"></div>
-        <aside class="glass cart">
-          <h3>🛒 Your Cart</h3>
-          <ul id="cartItems" style="margin:0; padding-left:18px;"><li>No events selected yet.</li></ul>
-          <div style="display:flex; justify-content:space-between; margin-top:10px;">
-            <strong>Total</strong> <strong id="cartTotal">₹0</strong>
+    <div class="step-container">
+      
+      <main>
+        <section class="glass card popIn" data-step="0">
+          <span class="label">Step 1: Student Details</span>
+          <div class="grid grid-2">
+            <input id="name" placeholder="Full Name" />
+            <input id="roll" placeholder="Roll Number" />
           </div>
-          <button id="proceedPay" class="btn glow" style="width:100%; margin-top:10px;" disabled>Proceed to Payment</button>
-          <p class="footer-note">Payments via bank transfer. UTR required for confirmation.</p>
-        </aside>
-      </div>
-    </section>
-  </div>
+          <div class="grid grid-2">
+            <select id="gender"><option value="Male">Male</option><option value="Female">Female</option></select>
+            <select id="year"></select>
+          </div>
+          <button id="next1" class="btn glow" style="width:100%;">Continue →</button>
+        </section>
 
+        <section class="glass card popIn" data-step="1" style="display:none;">
+          <span class="label">Step 2: Department</span>
+          <select id="branch"><option value="">Select Branch</option></select>
+          <div class="grid grid-2">
+            <button id="next2" class="btn glow">Next Step</button>
+            <button onclick="location.reload()" class="btn ghost">Reset</button>
+          </div>
+        </section>
+
+        <section class="glass card popIn" data-step="2" style="display:none;">
+          <span class="label">Step 3: Select Events</span>
+          <div id="eventList"></div>
+        </section>
+      </main>
+
+      <aside class="glass card cart popIn" id="cartSection">
+        <h3 style="margin-bottom:15px; display:flex; align-items:center; gap:8px;">🛒 Registration Cart</h3>
+        <ul id="cartItems" style="padding:0; margin:0; list-style:none;"></ul>
+        <hr style="border:0; border-top:1px solid var(--border); margin:15px 0;">
+        <div style="display:flex; justify-content:space-between; font-size:1.2rem; font-weight:bold;">
+          <span>Total</span>
+          <span id="cartTotal" style="color:var(--good);">₹0</span>
+        </div>
+        <button id="proceedPay" class="btn glow" style="width:100%; margin-top:15px;" disabled>Proceed to Pay</button>
+      </aside>
+
+    </div>
+  </div>
   <script src="app.js"></script>
 </body>
 </html>

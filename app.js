@@ -1,130 +1,74 @@
-/* App for PBR VITS — Clean UI & Animated Cart */
-const UNI = "PBR VITS";
-const SUPPORT_NUMBER = "7075881419"; 
-
-let audioCtx;
-function beep(freq=700, dur=0.08){ try{
-  if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
-  const o=audioCtx.createOscillator(), g=audioCtx.createGain();
-  o.type="sine"; o.frequency.value=freq;
-  g.gain.setValueAtTime(0.0001, audioCtx.currentTime);
-  g.gain.exponentialRampToValueAtTime(0.16, audioCtx.currentTime + 0.015);
-  g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
-  o.connect(g).connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime + dur);
-}catch(e){}}
-
+/* App for PBR VITS — PC Optimized */
 const BRANCHES = ["AIML","AI","CSE","ECE","EEE","MECH","CIVIL"];
 const YEARS = ["1st Year","2nd Year","3rd Year","4th Year"];
-
 const EVENTS = {
-  Technical: [
-    { id:"hack",  name:"Hackathon",  emoji:"💻", price:300 },
-    { id:"robo",  name:"Robo Race",  emoji:"🤖", price:250 },
-    { id:"quiz",  name:"Tech Quiz",  emoji:"❓", price:150 }
-  ],
-  Cultural: [
-    { id:"dance", name:"Group Dance", emoji:"💃", price:200 },
-    { id:"sing",  name:"Solo Singing",emoji:"🎤", price:120 },
-    { id:"art",   name:"Art Jam",     emoji:"🎨", price:150 }
-  ]
+  Technical: [{id:"hack",name:"Hackathon",emoji:"💻",price:300},{id:"robo",name:"Robo Race",emoji:"🤖",price:250},{id:"quiz",name:"Tech Quiz",emoji:"❓",price:150}],
+  Cultural: [{id:"dance",name:"Group Dance",emoji:"💃",price:200},{id:"sing",name:"Solo Singing",emoji:"🎤",price:120},{id:"art",name:"Art Jam",emoji:"🎨",price:150}]
 };
 
-function $(s, r=document){ return r.querySelector(s); }
-function $all(s, r=document){ return Array.from(r.querySelectorAll(s)); }
+function $(s){ return document.querySelector(s); }
+function $all(s){ return Array.from(document.querySelectorAll(s)); }
 
 function hydrate(){
-  const bSel = $("#branch");
-  BRANCHES.forEach(b => bSel.innerHTML += `<option value="${b}">${b}</option>`);
-  const ySel = $("#year");
-  YEARS.forEach(y => ySel.innerHTML += `<option value="${y}">${y}</option>`);
+  BRANCHES.forEach(b => $("#branch").innerHTML += `<option value="${b}">${b}</option>`);
+  YEARS.forEach(y => $("#year").innerHTML += `<option value="${y}">${y}</option>`);
 
-  const list = $("#eventList");
   for(const cat in EVENTS){
-    const section = document.createElement("div");
-    section.innerHTML = `<h3 style="margin: 15px 0 8px 0; color:var(--accent); font-size:1rem; border-left:3px solid var(--accent); padding-left:10px;">${cat}</h3>`;
-    
+    const sec = document.createElement("div");
+    sec.innerHTML = `<h3 style="margin:15px 0 10px 0; color:var(--accent); font-size:1rem;">${cat}</h3>`;
     EVENTS[cat].forEach(ev => {
       const card = document.createElement("div");
       card.className = "glass";
-      card.style = "padding:12px; margin-bottom:8px; display:flex; align-items:center; gap:12px; cursor:pointer; border:1px solid var(--border); border-radius:12px; transition:0.2s;";
-      
-      card.innerHTML = `
-        <input type="checkbox" id="${ev.id}" value="${ev.id}" data-name="${ev.name}" data-price="${ev.price}" data-emoji="${ev.emoji}" style="width:18px; height:18px; pointer-events:none;" />
-        <div style="flex:1;">
-          <div style="display:flex; align-items:center;">
-            <strong style="font-size:0.95rem;">${ev.emoji} ${ev.name}</strong> 
-          </div>
-          <div style="font-size:0.8rem; color:var(--muted)">Registration: ₹${ev.price}</div>
-        </div>
-      `;
-
+      card.style = "padding:12px; margin-bottom:8px; display:flex; align-items:center; gap:12px; cursor:pointer; border:1px solid var(--border); border-radius:12px;";
+      card.innerHTML = `<input type="checkbox" id="${ev.id}" data-name="${ev.name}" data-price="${ev.price}" style="pointer-events:none; width:18px; height:18px;">
+                        <div style="flex:1"><strong>${ev.emoji} ${ev.name}</strong><br><small style="color:var(--muted)">₹${ev.price}</small></div>`;
       card.onclick = () => {
-        const checkbox = card.querySelector('input');
-        checkbox.checked = !checkbox.checked;
-        card.style.borderColor = checkbox.checked ? "var(--accent)" : "var(--border)";
-        card.style.background = checkbox.checked ? "rgba(176,123,255,0.08)" : "var(--glass)";
+        const ck = card.querySelector('input');
+        ck.checked = !ck.checked;
+        card.style.borderColor = ck.checked ? "var(--accent)" : "var(--border)";
         
-        // Trigger Cart Animation
-        const cartEl = $(".cart");
-        cartEl.classList.remove("cart-bump");
-        void cartEl.offsetWidth; // Force reflow
-        cartEl.classList.add("cart-bump");
+        // Cart Glow Animation
+        const cart = $("#cartSection");
+        cart.classList.remove("cart-bump");
+        void cart.offsetWidth;
+        cart.classList.add("cart-bump");
         
         updateCart();
-        beep(600, 0.05);
       };
-
-      section.appendChild(card);
+      sec.appendChild(card);
     });
-    list.appendChild(section);
+    $("#eventList").appendChild(sec);
   }
-  
-  ['name', 'roll', 'branch', 'year', 'gender'].forEach(id => {
-    const el = document.getElementById(id);
-    if(el && sessionStorage.getItem('draft_'+id)) el.value = sessionStorage.getItem('draft_'+id);
-    if(el) el.addEventListener('input', () => sessionStorage.setItem('draft_'+id, el.value));
-  });
-}
-
-function getSelected(){
-  const items = $all("#eventList input:checked").map(i => ({
-    id: i.value, name: i.dataset.name, price: parseInt(i.dataset.price), emoji: i.dataset.emoji
-  }));
-  return { items, total: items.reduce((sum, i) => sum + i.price, 0) };
 }
 
 function updateCart(){
-  const {items, total} = getSelected();
-  $("#cartItems").innerHTML = items.length ? items.map(i => `<li style="font-size:0.85rem; margin-bottom:4px; list-style:none;">✅ ${i.name}</li>`).join('') : "<li style='list-style:none; color:var(--muted)'>Empty</li>";
+  const selected = $all("#eventList input:checked").map(i => ({name: i.dataset.name, price: parseInt(i.dataset.price)}));
+  $("#cartItems").innerHTML = selected.length ? selected.map(s => `<li style="margin-bottom:5px;">✅ ${s.name}</li>`).join('') : "<li style='color:var(--muted)'>No events selected</li>";
+  const total = selected.reduce((a,b) => a + b.price, 0);
   $("#cartTotal").textContent = "₹" + total;
-  $("#proceedPay").disabled = items.length === 0;
+  $("#proceedPay").disabled = selected.length === 0;
 }
 
 function setStep(idx){
-  $all("[data-step]").forEach(s => s.style.display = "none");
-  $(`[data-step="${idx}"]`).style.display = "block";
-  $all(".stepper .step").forEach((d, i) => d.classList.toggle("active", i <= idx));
-  window.scrollTo({top:0, behavior:'smooth'});
+  $all("[data-step]").forEach((s, i) => s.style.display = i == idx ? "block" : "none");
 }
 
-async function showLoader(ms=500, emo="⏳"){
-  const l = $("#loader");
-  l.querySelector(".bubble").textContent = emo;
-  l.classList.add("active");
-  return new Promise(r => setTimeout(()=>{ l.classList.remove("active"); r(); }, ms));
+async function showLoader(){
+  $("#loader").classList.add("active");
+  await new Promise(r => setTimeout(r, 600));
+  $("#loader").classList.remove("active");
 }
 
-function start(){
-  hydrate(); setStep(0); updateCart();
-  $("#next1").onclick = async () => { if($("#name").value && $("#roll").value){ beep(); await showLoader(); setStep(1); } else alert("Fill details"); };
-  $("#next2").onclick = async () => { if($("#branch").value){ beep(); await showLoader(); setStep(2); } else alert("Select branch"); };
-  $("#proceedPay").onclick = async () => {
-    const {items, total} = getSelected();
+window.onload = () => {
+  hydrate();
+  $("#next1").onclick = async () => { if($("#name").value && $("#roll").value) { await showLoader(); setStep(1); } else alert("Fill details"); };
+  $("#next2").onclick = async () => { if($("#branch").value) { await showLoader(); setStep(2); } else alert("Select branch"); };
+  $("#proceedPay").onclick = () => {
+    const items = $all("#eventList input:checked").map(i => ({name: i.dataset.name, price: i.dataset.price}));
     localStorage.setItem("pendingPayment", JSON.stringify({
       name: $("#name").value, roll: $("#roll").value, branch: $("#branch").value,
-      year: $("#year").value, gender: $("#gender").value, items, total
+      year: $("#year").value, total: $("#cartTotal").textContent.replace("₹",""), items
     }));
-    beep(); await showLoader(800, "💸"); window.location.href = "payment.html";
+    window.location.href = "payment.html";
   };
-}
-document.addEventListener("DOMContentLoaded", start);
+};
